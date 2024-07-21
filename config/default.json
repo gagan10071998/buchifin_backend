@@ -1,0 +1,96 @@
+{
+	"PORT": 9072,
+	"DB_URL": "mongodb+srv://anjali:54321QWERTy@cluster0.sls3t.mongodb.net/buchifin?retryWrites=true&w=majority",
+	"REDIS": {
+		"PORT": 6379,
+		"HOST": "127.0.0.1"
+	},
+	"JWT_OPTIONS": {
+		"SECRET_KEY": "SECRET_KEY",
+		"EXPIRES_IN": {
+			"TOKEN": 9000,
+			"REFRESH_TOKEN": "1d"
+		}
+	},
+	"PATHS": {
+		"IMAGE": {
+			"ACTUAL": "/uploads/images/",
+			"STATIC": "/image/"
+		},
+		"FILE": {
+			"ACTUAL": "/uploads/files",
+			"STATIC": "/document/"
+		}
+	},
+	"OTP_OPTIONS": {
+		"EXPIRES": 1,
+		"IN": "minutes"
+	},
+	"SUPER_ADMIN": {
+		"name": "superAdmin",
+		"email": "superAdmin@buchifin.live",
+		"gender": "OTHER",
+		"phone": [
+			{
+				"phoneType": "home",
+				"phone": "8168452177"
+			}
+		],
+		"password": "superAdmin",
+		"type": [
+			"SUPER_ADMIN"
+		]
+	},
+	"USER_TYPES": {
+		"SUPER_ADMIN": "SUPER_ADMIN",
+		"ADMIN": "ADMIN",
+		"RETAILER_MANAGER": "RETAILER_MANAGER",
+		"RETAILER_ADMIN": "RETAILER_ADMIN",
+		"MANUFACTURER_ADMIN": "MANUFACTURER_ADMIN"
+	},
+	"AWS_ACCESS_KEY_ID": "XXXXXX",
+	"AWS_SECRET_ACCESS_KEY": "XXXXXXX",
+	"S3_REGION": "ap-south-1",
+	"OTP_TYPES": {
+		"FORGOT": "FORGOT"
+	},
+	"FIRM_DOCUMENT": [
+		"aadhar",
+		"pan",
+		"fertilizer",
+		"insecticide",
+		"seed",
+		"gst",
+		"govtCertificate",
+		"other",
+		"profilePic"
+	],
+	"RETAILER_DOCUMENT": [
+		"aadhar",
+		"adminAadhar",
+		"adminPan",
+		"pan",
+		"adminProfilePic",
+		"managerAadhar",
+		"profilePic",
+		"managerAadhar1",
+		""
+	],
+	"DOCUMENT_TYPES": [
+		"registrationCertificate",
+		"license",
+		"aadhaar",
+		"pan",
+		"bankDetails",
+		"fertilizer",
+		"insecticide",
+		"seed",
+		"gst",
+		"govtCertificate",
+		"other",
+		"firmProfilePic",
+		"docFront",
+		"docBack"
+	],
+	"maxLoginsAllowed": 2
+}

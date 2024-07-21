@@ -1,0 +1,44 @@
+{
+    "PORT": 9072,
+    "DB_URL": "mongodb://localhost:27017/buchifin?replicaSet=rs0",
+    "REDIS": {
+        "PORT": 6379,
+        "HOST": "127.0.0.1"
+    },
+    "JWT_OPTIONS": {
+        "SECRET_KEY": "SECRET_KEY",
+        "EXPIRES_IN": {
+            "TOKEN": 9000,
+            "REFRESH_TOKEN": "1d"
+        }
+    },
+    "PATHS": {
+        "IMAGE": {
+            "ACTUAL": "/uploads/images/",
+            "STATIC": "/image/"
+        },
+        "FILE": {
+            "ACTUAL": "/uploads/files",
+            "STATIC": "/document/"
+        }
+    },
+    "OTP_OPTIONS": {
+        "EXPIRES": 1,
+        "IN": "minutes"
+    },
+    "SUPER_ADMIN": {
+        "name": "superAdmin",
+        "email": "superAdmin@buchifin.live",
+        "phone": "8168452177",
+        "countryCode": "+91",
+        "password": "superAdmin"
+    },
+    "USER_TYPES": {
+        "SUPER_ADMIN": "SUPER_ADMIN",
+        "ADMIN": "ADMIN"
+    },
+    "OTP_TYPES": {
+        "FORGOT": "FORGOT"
+    },
+    "maxLoginsAllowed": 2
+}
