@@ -1,6 +1,6 @@
 {
 	"PORT": 9072,
-	"DB_URL": "mongodb+srv://anjali:54321QWERTy@cluster0.sls3t.mongodb.net/buchifin?retryWrites=true&w=majority",
+	"DB_URL": "mongodb+srv://v2-admin:BQiKzmvWNyxqkaGb@v2-development.4tudi.mongodb.net/test123?retryWrites=true&w=majority&appName=v2-development",
 	"REDIS": {
 		"PORT": 6379,
 		"HOST": "127.0.0.1"
