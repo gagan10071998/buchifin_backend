@@ -9,6 +9,17 @@ const UserModel = new Schema({
     type: String,
     default: "/profilepics/defaultuser.jpg",
   },
+  qualificationDocs: [
+    {
+      name: {
+        type: String
+      },
+      doc: {
+        type: ObjectId,
+        ref: 'Document'
+      },
+    }
+  ],
   aadhaar: {
     number: {
       type: String
@@ -30,6 +41,31 @@ const UserModel = new Schema({
       type: String
     },
     doc: {
+      front: {
+        type: ObjectId,
+        ref: 'Document'
+      },
+      back: {
+        type: ObjectId,
+        ref: 'Document'
+      }
+    },
+    note: { type: String }
+  },
+  bankDetails: {
+    accountName: {
+      type: String
+    },
+    accountNumber: {
+      type: String
+    },
+    ifscCode: {
+      type: String
+    },
+    bankName: {
+      type: String
+    },
+    cancelCheque: {
       front: {
         type: ObjectId,
         ref: 'Document'

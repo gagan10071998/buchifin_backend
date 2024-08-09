@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const controllers = require('../controllers');
-const { upload } = require('../services');
+const {upload} = require('../services');
 
 router.post("/update/id", upload.upload.fields([
     { name: 'gst[doc][front]', maxCount: 1 },

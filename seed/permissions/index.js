@@ -105,6 +105,34 @@ module.exports = {
             }
         },
     },
+    '/api/v1/agronomist': {
+        "SUPER_ADMIN": {
+            "POST": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            },
+            "GET": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            }
+        },
+    },
+    '/api/v1/agronomist/:id': {
+        "SUPER_ADMIN": {
+            "GET": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            },
+            "PUT": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            }
+        }
+    },
     '/api/v1/distributor/:id': {
         "SUPER_ADMIN": {
             "GET": {
