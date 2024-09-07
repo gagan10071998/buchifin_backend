@@ -1,6 +1,6 @@
 {
 	"PORT": 9072,
-	"DB_URL": "mongodb+srv://v2-admin:BQiKzmvWNyxqkaGb@v2-development.4tudi.mongodb.net/test123?retryWrites=true&w=majority&appName=v2-development",
+	"DB_URL": "mongodb://localhost:27017/test123?replicaSet=rs0",
 	"REDIS": {
 		"PORT": 6379,
 		"HOST": "127.0.0.1"
