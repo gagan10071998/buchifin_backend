@@ -6,4 +6,5 @@ router.use('/retailer', Routes.retailer);
 router.use('/agronomist', Routes.agronomist);
 router.use('/manufacturer', Routes.manufacturer);
 router.use('/company', Routes.company);
+router.use('/document', Routes.document);
 module.exports = router;

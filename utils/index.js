@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const ffmpeg = require('fluent-ffmpeg')
 const Models = require('../models');
-const { uploadFileToS3 } = require('./S3Bucket')
+const { uploadFileToS3, generatePresignedUrlForDownload } = require('./S3Bucket')
 const jwtVerify = async (token, refresh) => {
     try {
         if (!refresh) {
@@ -84,6 +84,7 @@ const AuthHelper = async (req, res, next) => {
 }
 
 module.exports = {
+    generatePresignedUrlForDownload,
     Authorization: async (req, res, next) => {
         try {
             let isApiAuthFree = false

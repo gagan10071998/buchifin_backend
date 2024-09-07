@@ -26,4 +26,14 @@ const uploadFileToS3 = (file, type = 'doc') => {
   });
 };
 
-module.exports = { uploadFileToS3 };
+const generatePresignedUrlForDownload = (fileKey) => {
+  const params = {
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Key: fileKey,
+    Expires: 60 * 60, // URL expires in 15 mins
+  }
+
+  return s3.getSignedUrlPromise('getObject', params)
+}
+
+module.exports = { uploadFileToS3, generatePresignedUrlForDownload };

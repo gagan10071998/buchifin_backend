@@ -193,4 +193,13 @@ module.exports = {
             },
         }
     },
+    '/api/v1/document/:id': {
+        "ALL": {
+            "GET": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            }
+        },
+    },
 }

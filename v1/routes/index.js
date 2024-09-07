@@ -4,5 +4,6 @@ module.exports = {
     company: require('./company'),
     manufacturer: require('./manufacturer'),
     distributor: require('./distributor'),
-    agronomist: require('./agronomist')
+    agronomist: require('./agronomist'),
+    document: require('./document')
 }
