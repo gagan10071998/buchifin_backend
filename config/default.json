@@ -1,6 +1,6 @@
 {
 	"PORT": 9072,
-	"DB_URL": "mongodb://localhost:27017/test123?replicaSet=rs0",
+	"DB_URL": "mongodb://13.232.126.175:27017/test123?retryWrites=true&loadBalanced=false&connectTimeoutMS=10000",
 	"REDIS": {
 		"PORT": 6379,
 		"HOST": "127.0.0.1"

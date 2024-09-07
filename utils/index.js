@@ -69,7 +69,7 @@ const AuthHelper = async (req, res, next) => {
             for (const permission of permissions) {
                 const regex = pathToRegexp(permission.path)
                 if (regex.test(req.path)) {
-                    isAllowed = true
+                    isAllowed = permission
                     break
                 }
             }

@@ -11,7 +11,7 @@ module.exports = {
   getById: async (req, res, next) => {
     try {
       const document = await Models.Document.findOne({
-        id: req.params.id
+        _id: new ObjectId(req.params.id)
       });
       if (!document) {
         return await universal.response(res, CODES.BAD_REQUEST, MESSAGES.DOCUMENT_NOT_EXISTS, {})
