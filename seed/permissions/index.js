@@ -198,6 +198,20 @@ module.exports = {
             }
         }
     },
+    '/api/v1/manufacturer/batch/:id': {
+        "SUPER_ADMIN": {
+            "GET": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            },
+            "PUT": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            }
+        }
+    },
     '/api/v1/manufacturer/firm/:id': {
         "SUPER_ADMIN": {
             "GET": {

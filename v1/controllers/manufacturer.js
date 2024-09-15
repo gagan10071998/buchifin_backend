@@ -238,8 +238,73 @@ module.exports = {
       next(error);
     }
   },
-  // getAllBatches,
-  // getBatchById,
-  // updateBatchById,
+  getAllBatches: async (req, res, next) => {
+    try {
+      const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+      const itemsPerPage = Math.max(10, Number.parseInt(req.query.limit, 10) || 10);
+      const skipDocs = (page - 1) * itemsPerPage;
+
+      const searchQuery = req.query.search || '';
+
+      const countPipeline = [
+        { $match: { manufacturer: new ObjectId(req.query.manufacturer), isDeleted: false } },
+      ];
+
+      const pipeline = [
+        { $match: { manufacturer: new ObjectId(req.query.manufacturer), isDeleted: false } },
+        { $sort: { createdAt: -1 } },
+        { $skip: skipDocs },
+        { $limit: itemsPerPage }
+      ]
+
+      const batches = await Models.Batch.aggregate(pipeline).exec();
+      const totalBatches = (await Models.Batch.aggregate(countPipeline).exec()).length;
+
+      const result = {
+        status: CODES.OK,
+        message: MESSAGES.DATA_FETCHED_SUCCESSFULLY,
+        data: {
+          records: batches,
+          page,
+          count: totalBatches,
+          totalPages: Math.ceil(totalBatches / itemsPerPage)
+        }
+      };
+
+      return universal.response(res, result.status, result.message, result.data, req.lang);
+
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+  getBatchById: async (req, res, next) => {
+    try {
+
+      const batch = await Models.Batch.findOne({ _id: new ObjectId(req.params.id)});
+      const result = {
+        status: CODES.OK,
+        message: MESSAGES.DATA_FETCHED_SUCCESSFULLY,
+        data: batch
+      };
+
+      return universal.response(res, result.status, result.message, result.data, req.lang);
+
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+  updateBatchById: async (req, res, next) => {
+    try {
+      await Models.Batch.updateOne({_id: new ObjectId(req.params.id)}, req.body).lean()
+
+      return await universal.response(res,CODES.OK, MESSAGES.DATA_FETCHED_SUCCESSFULLY, {}, req.lang)
+
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
 
 };
