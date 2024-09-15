@@ -222,4 +222,24 @@ module.exports = {
       next(error);
     }
   },
+  createBatch: async (req, res, next) => {
+    try {
+
+      req.body.createdBy = req.user._id;
+      req.body.createdByType = req.userType;
+      req.body.createdBy = req.user._id
+      req.body.createdByType = req.userType
+
+      await new Models.Batch(req.body).save();
+      return universal.response(res, CODES.OK, MESSAGES.MANUFACTURER_REGISTERED_SUCCESSFULLY, {})
+
+    } catch (error) {
+      console.log(error)
+      next(error);
+    }
+  },
+  // getAllBatches,
+  // getBatchById,
+  // updateBatchById,
+
 };

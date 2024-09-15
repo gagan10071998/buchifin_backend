@@ -5,5 +5,6 @@ module.exports = {
     AuthToken: require('./authToken'),
     ErrorHandler: require('./errorHandler'),
 	Document: require('./document'),
-    Company: require('./company')
+    Company: require('./company'),
+    Batch: require('./batch')
 }
