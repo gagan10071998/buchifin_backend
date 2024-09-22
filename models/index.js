@@ -6,5 +6,6 @@ module.exports = {
     ErrorHandler: require('./errorHandler'),
 	Document: require('./document'),
     Company: require('./company'),
-    Batch: require('./batch')
+    Batch: require('./batch'),
+    Category: require('./category')
 }

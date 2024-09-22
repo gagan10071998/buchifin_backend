@@ -184,6 +184,34 @@ module.exports = {
             }
         },
     },
+    '/api/v1/category': {
+        "SUPER_ADMIN": {
+            "POST": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            },
+            "GET": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            }
+        },
+    },
+    '/api/v1/category/:id': {
+        "SUPER_ADMIN": {
+            "GET": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            },
+            "PUT": {
+                "auth": true,
+                "value": true,
+                "code": 6
+            }
+        }
+    },
     '/api/v1/manufacturer/:id': {
         "SUPER_ADMIN": {
             "GET": {

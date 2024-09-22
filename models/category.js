@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId;
 
-const ProductCategorySchema = new Schema({
+const CategorySchema = new Schema({
   name: {
     type: String,
     trim: true,
@@ -16,7 +16,7 @@ const ProductCategorySchema = new Schema({
   },
   parentCategory: {
     type: ObjectId,
-    ref: 'ProductCategory',
+    ref: 'Category',
     default: null
   },
   status: {
@@ -52,20 +52,20 @@ const ProductCategorySchema = new Schema({
   toJSON: { virtuals: true },
 });
 
-ProductCategorySchema.pre("find", function (next) {
+CategorySchema.pre("find", function (next) {
   this.where({ isDeleted: false });
   next();
 });
 
-ProductCategorySchema.pre("findOne", function (next) {
+CategorySchema.pre("findOne", function (next) {
   this.where({ isDeleted: false });
   next();
 });
 
-ProductCategorySchema.pre("findOneAndUpdate", function (next) {
+CategorySchema.pre("findOneAndUpdate", function (next) {
   this.where({ isDeleted: false });
   next();
 });
 
-const ProductCategory = mongoose.model("ProductCategory", ProductCategorySchema);
-module.exports = ProductCategory;
+const Category = mongoose.model("Category", CategorySchema);
+module.exports = Category;
