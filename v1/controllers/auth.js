@@ -9,6 +9,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const Projections = require('../projections').auth;
 const OTP_TYPES = config.get('OTP_TYPES');
 const { startSession } = require('mongoose');
+const { sendSMS, formatPhoneNumber } = require('../../utils/Sms');
 
 module.exports = {
   login: async (req, res, next) => {
@@ -154,6 +155,115 @@ module.exports = {
       next(error);
     } finally {
       session.endSession();
+    }
+  },
+  sendEmailVerification: async (req, res, next) => {
+    try {
+        await validations.auth.validateEmailVerification(req, 'body');
+        
+        const { email } = req.body;
+
+        // Generate OTP
+        const otp = await universal.generateOtp();
+        
+        // Save OTP in database
+        await Models.Otp({
+            email,
+            code: otp,
+            type: 'EMAIL_VERIFICATION',
+            expireAt: new Date(Date.now() + config.get('OTP_OPTIONS').EXPIRES * 60000)
+        }).save();
+
+        // Send email
+        const emailMessage = `Your email verification OTP is: ${otp}. This OTP will expire in ${config.get('OTP_OPTIONS').EXPIRES} minutes.`;
+        await universal.emailService.sendEmail(email, 'Email Verification', emailMessage);
+
+        return await universal.response(res, CODES.OK, MESSAGES.OTP_SENT_SUCCESSFULLY, {}, req.lang);
+    } catch (error) {
+        next(error);
+    }
+  },
+  verifyEmail: async (req, res, next) => {
+    try {
+        const { email, otp } = req.body;
+
+        const otpRecord = await Models.Otp.findOne({
+            email,
+            code: otp,
+            type: 'EMAIL_VERIFICATION'
+        }).lean();
+
+        if (!otpRecord) throw new Error(MESSAGES.INVALID_OTP);
+        if (otpRecord.expireAt < new Date()) throw new Error(MESSAGES.OTP_EXPIRED);
+        
+        // Delete used OTP
+        await Models.Otp.findByIdAndDelete(otpRecord._id);
+
+        return await universal.response(res, CODES.OK, 'Email verified successfully', {}, req.lang);
+    } catch (error) {
+        next(error);
+    }
+  },
+  sendPhoneVerification: async (req, res, next) => {
+    try {
+        await validations.auth.validatePhoneVerification(req, 'body');
+        
+        const { phone, countryCode } = req.body;
+        
+        // Format phone number
+        const formattedPhone = formatPhoneNumber(phone, countryCode);
+        console.log('INSIDE',formattedPhone);
+
+        // Generate OTP
+        const otp = await universal.generateOtp();
+        
+        // Save OTP in database
+        await Models.Otp({
+            phone: formattedPhone,
+            countryCode,
+            code: otp,
+            type: 'PHONE_VERIFICATION',
+            expireAt: new Date(Date.now() + config.get('OTP_OPTIONS').EXPIRES * 60000)
+        }).save();
+
+        // Send SMS
+        const message = `Your verification OTP is: ${otp}. Valid for ${config.get('OTP_OPTIONS').EXPIRES} minutes.`;
+       // await sendSMS(formattedPhone, message);
+
+        return await universal.response(res, CODES.OK, MESSAGES.OTP_SENT_SUCCESSFULLY, {code: otp}, req.lang);
+    } catch (error) { 
+        console.error('Phone verification error:', error);
+        next(error);
+    }
+  },
+  verifyPhone: async (req, res, next) => {
+    try {
+        const { phone, countryCode, otp } = req.body;
+        console.log('req', req.body);
+
+        const otpRecord = await Models.Otp.findOne({
+            phone,
+            countryCode,
+            code: otp,
+            type: 'PHONE_VERIFICATION'
+        }).lean();
+        console.log('OTP RECORDS', otpRecord);
+
+        if (!otpRecord) throw new Error(MESSAGES.INVALID_OTP);
+        if (otpRecord.expireAt < new Date()) throw new Error(MESSAGES.OTP_EXPIRED);
+
+        // Update user phone verification status
+        await Models.User.findOneAndUpdate(
+            { phone, countryCode }, 
+            { isPhoneVerified: true }
+        );
+        
+        // Delete used OTP
+        await Models.Otp.findByIdAndDelete(otpRecord._id);
+
+        return await universal.response(res, CODES.OK, 'Phone verified successfully', {}, req.lang);
+    } catch (error) {
+        next(error);
     }
   }
   

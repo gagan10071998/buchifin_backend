@@ -7,5 +7,6 @@ module.exports = {
 	Document: require('./document'),
     Company: require('./company'),
     Batch: require('./batch'),
-    Category: require('./category')
+    Category: require('./category'),
+    Product: require('./product')
 }

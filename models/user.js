@@ -165,6 +165,10 @@ const UserModel = new Schema({
   updatedByType: {
     type: String,
     enum: USER_TYPES
+  },
+  isPhoneVerified: {
+    type: Boolean,
+    default: false
   }
 },
   {

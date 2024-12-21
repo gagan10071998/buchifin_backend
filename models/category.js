@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId;
+const config = require("config");
+const USER_TYPES = Object.values(config.get("USER_TYPES"));
+
 
 const CategorySchema = new Schema({
   name: {

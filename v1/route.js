@@ -8,4 +8,5 @@ router.use('/manufacturer', Routes.manufacturer);
 router.use('/company', Routes.company);
 router.use('/document', Routes.document);
 router.use('/category', Routes.category);
+router.use('/product', Routes.product);
 module.exports = router;
