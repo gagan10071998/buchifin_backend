@@ -20,7 +20,6 @@ module.exports = {
         type: { $in: ["MANUFACTURER_ADMIN"] },
         status: "ACTIVE"
       });
-      console.log('INSIDE', manufacturer)
       if (universal.isEmpty(manufacturer)) {
         return universal.response(res, MESSAGES.MANUFACTURER_NOT_FOUND, "Invalid or inactive manufacturer", {});
       }
@@ -168,7 +167,7 @@ module.exports = {
     try {
       const { status } = req.body;
       if (!["ACTIVE", "INACTIVE", "DISCONTINUED"].includes(status)) {
-        return universal.response(res, CODES.BAD_REQUEST, "Invalid status", {});
+        return universal.response(res, CODES.BAD_REQUEST, MESSAGES.STATUS_NOT_FOUND, {});
       }
 
       const product = await Models.Product.findOne({ _id: new ObjectId(req.params.id) });
@@ -236,7 +235,7 @@ module.exports = {
       if (req.body.sku && req.body.sku !== product.sku) {
         const existingSku = await Models.Product.findOne({ sku: req.body.sku });
         if (existingSku) {
-          return universal.response(res, CODES.BAD_REQUEST, "SKU already exists", {});
+          return universal.response(res, CODES.BAD_REQUEST, MESSAGES.SKU_ALREADY_EXIST, {});
         }
       }
 
