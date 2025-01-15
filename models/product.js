@@ -52,24 +52,6 @@ const ProductSchema = new Schema({
       type: String,
       enum: ['kg', 'g', 'liter', 'ml'],
       required: true
-    },
-    mrp: {
-      type: Number,
-      required: true
-    },
-    dealerPrice: {
-      type: Number,
-      required: true
-    }
-  }],
-  composition: [{
-    ingredient: {
-      type: String,
-      required: true
-    },
-    percentage: {
-      type: Number,
-      required: true
     }
   }],
   recommendedDose: {
@@ -90,7 +72,8 @@ const ProductSchema = new Schema({
   },
   pamphlet: {
     type: ObjectId,
-    ref: 'Document'
+    ref: 'Document',
+    required: false
   },
   safetyInstructions: {
     type: String,

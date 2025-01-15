@@ -20,7 +20,7 @@ const InventorySchema = new Schema({
   batch: {
     type: ObjectId,
     ref: 'Batch',
-    required: true,
+    required: false,
     index: true
   },
   packagingSize: {
@@ -55,18 +55,13 @@ const InventorySchema = new Schema({
     type: Date,
     required: true
   },
-  invoiceNumber: {
+  purchasedInvoiceNumber: {
     type: String,
     required: true
   },
-  invoiceDocument: {
+  purchasedInvoiceDocument: {
     type: ObjectId,
     ref: 'Document',
-    required: true
-  },
-  supplier: {
-    type: ObjectId,
-    ref: 'User',
     required: true
   },
   location: {
@@ -75,7 +70,11 @@ const InventorySchema = new Schema({
       required: true
     },
     rack: String,
-    shelf: String
+    shelf: String,
+    geolocation: {
+      type: { type: String, default: "Point" },
+      coordinates: { type: [Number], required: false } // [longitude, latitude]
+    }
   },
   status: {
     type: String,
@@ -84,6 +83,7 @@ const InventorySchema = new Schema({
   },
   minimumStockLevel: {
     type: Number,
+    default: 0,
     required: true
   },
   isDeleted: {
@@ -107,12 +107,20 @@ const InventorySchema = new Schema({
   updatedByType: {
     type: String,
     enum: USER_TYPES
+  },
+  packagingOptionIndex: {
+    type: Number,
+    required: false
   }
 }, {
   timestamps: true,
   toObject: { virtuals: true },
   toJSON: { virtuals: true }
 });
+
+// Add indices for geolocation and composite queries
+InventorySchema.index({ 'location.geolocation': '2dsphere' });
+InventorySchema.index({ retailer: 1, product: 1 });
 
 // Add pre-save middleware to check and update status based on quantity
 InventorySchema.pre('save', function(next) {
@@ -122,4 +130,6 @@ InventorySchema.pre('save', function(next) {
     this.status = "LOW_STOCK";
   }
   next();
-}); 
+});
+
+module.exports = mongoose.model("Inventory", InventorySchema);

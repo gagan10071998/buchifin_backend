@@ -14,6 +14,7 @@ module.exports = {
   create: async (req, res, next) => {
     try {
       // Check if manufacturer exists and is active
+      console.log('BODY', req.body);
       const manufacturer = await Models.User.findOne({
         _id: req.body.manufacturer,
         type: { $in: ["MANUFACTURER_ADMIN"] },
@@ -33,6 +34,7 @@ module.exports = {
 
       // Check for unique SKU
       const existingSku = await Models.Product.findOne({ sku: req.body.sku });
+      console.log('SKU', existingSku)
       if (existingSku) {
           return universal.response(res, MESSAGES.SKU_ALREADY_EXISTS, "SKU already exists", {});
       }
@@ -44,6 +46,7 @@ module.exports = {
       req.body.status = req.userType === USER_TYPES.SUPER_ADMIN ? "ACTIVE" : "PENDING_APPROVAL";
 
       const product = await new Models.Product(req.body).save();
+      console.log('PRODUCT', product);
       return universal.response(res, CODES.OK, MESSAGES.PRODUCT_CREATED_SUCCESSFULLY, product);
     } catch (error) {
       console.log(error);
@@ -63,6 +66,9 @@ module.exports = {
       let query = { isDeleted: false };
 
       // Add filters
+
+
+      
       if (search) {
         query.$or = [
           { name: { $regex: search, $options: 'i' } },

@@ -14,9 +14,7 @@ module.exports = {
       packagingOptions: Joi.array().items(
         Joi.object({
           size: Joi.number().required(),
-          unitOfMeasure: Joi.string().valid('kg', 'g', 'liter', 'ml').required(),
-          mrp: Joi.number().required(),
-          dealerPrice: Joi.number().required()
+          unitOfMeasure: Joi.string().valid('kg', 'g', 'liter', 'ml').required()
         })
       ).min(1).required(),
       composition: Joi.array().items(
@@ -28,7 +26,7 @@ module.exports = {
       recommendedDose: Joi.string().required(),
       registrationNumber: Joi.string().required(),
       description: Joi.string().required(),
-      pamphlet: Joi.objectId(),
+      //pamphlet: Joi.objectId(),
       safetyInstructions: Joi.string().required(),
       antidote: Joi.string(),
       storageInstructions: Joi.string().required(),
@@ -38,6 +36,7 @@ module.exports = {
 
     const { error } = schema.validate(req.body);
     if (error) {
+      console.log(error)
       return res.status(400).json({ error: error.details[0].message });
     }
     next();
@@ -54,9 +53,7 @@ module.exports = {
       packagingOptions: Joi.array().items(
         Joi.object({
           size: Joi.number(),
-          unitOfMeasure: Joi.string().valid('kg', 'g', 'liter', 'ml'),
-          mrp: Joi.number(),
-          dealerPrice: Joi.number()
+          unitOfMeasure: Joi.string().valid('kg', 'g', 'liter', 'ml')
         })
       ),
       composition: Joi.array().items(

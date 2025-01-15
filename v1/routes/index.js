@@ -7,5 +7,6 @@ module.exports = {
     agronomist: require('./agronomist'),
     document: require('./document'),
     category: require('./category'),
-    product: require('./product')
+    product: require('./product'),
+    inventory: require('./inventory')
 }

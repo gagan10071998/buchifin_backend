@@ -41,7 +41,7 @@ const startServer = async (retryCount = 0) => {
                 console.error('Failed to kill the process:', killError.message);
             }
         }
-        throw err;
+        //throw err;
     }
 };
 
@@ -53,8 +53,8 @@ mongoose.connect(config.get('DB_URL'), { useNewUrlParser: true, useUnifiedTopolo
         console.log(`****************************************** MONGODB CONNECTED ***********************************************`);
         try {
             await seed.createSuperAdmin();
-            await seed.createPermissions();
-            await seed.seedCategories();
+            //await seed.createPermissions();
+            //await seed.seedCategories();
             await startServer();
         } catch (error) {
             console.error("Error during startup:", error);

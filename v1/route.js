@@ -9,4 +9,5 @@ router.use('/company', Routes.company);
 router.use('/document', Routes.document);
 router.use('/category', Routes.category);
 router.use('/product', Routes.product);
+router.use('/inventory', Routes.inventory);
 module.exports = router;
