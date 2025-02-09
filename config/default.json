@@ -47,7 +47,7 @@
 		"RETAILER_MANAGER": "RETAILER_MANAGER",
 		"RETAILER_ADMIN": "RETAILER_ADMIN",
 		"MANUFACTURER_ADMIN": "MANUFACTURER_ADMIN",
-		"DISTRIBUTOR_ADMIN":"DISTRIBUTOR_ADMIN",
+		"DISTRIBUTOR_ADMIN": "DISTRIBUTOR_ADMIN",
 		"AGRONOMIST": "AGRONOMIST"
 	},
 	"AWS_ACCESS_KEY_ID": "XXXXXX",
@@ -109,5 +109,28 @@
 	},
 	"FAST2SMS": {
 		"API_KEY": "KPH6dcWTFl1eJSoR0mZE8a59XxpqjwM32UDYngAIO7ytiGQzhNxSr6WCiUHIcgAJbReDzvEVapy27tTZ"
+	},
+	"REGEX_PATTERNS": {
+		"GSTIN": "^\\d{2}[A-Z]{5}\\d{4}[A-Z]{1}\\d[Z]{1}[A-Z\\d]{1}$"
+	},
+	"UNIT_TYPES": [
+		"kg",
+		"g",
+		"liter",
+		"ml",
+		"piece",
+		"box"
+	],
+	"BUSINESS_RELATIONS": {
+		"RETAILER": [
+			"CUSTOMER",
+			"RETAILER"
+		],
+		"DISTRIBUTOR": [
+			"RETAILER"
+		],
+		"MANUFACTURER": [
+			"DISTRIBUTOR"
+		]
 	}
 }

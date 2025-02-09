@@ -3,8 +3,9 @@ Joi.objectId = require('joi-objectid')(Joi);
 
 module.exports = {
   create: (req, res, next) => {
+    console.log(req.body)
     const schema = Joi.object({
-      sku: Joi.string().required(),
+      sku: Joi.string().optional(), 
       name: Joi.string().required(),
       technicalName: Joi.string().required(),
       category: Joi.objectId().required(),

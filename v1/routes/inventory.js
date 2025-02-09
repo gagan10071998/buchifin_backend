@@ -7,7 +7,7 @@ const validateId = require('../middleware/validateId');
 
 // Inventory management routes
 router.post("/add-product", 
-  validations.create,
+  //validations.create,
   controllers.inventory.addProductToInventory
 );
 
@@ -16,6 +16,7 @@ router.get("/",
 );
 
 router.get("/:id", validateId, controllers.inventory.getById);
+router.get("/", controllers.inventory.getById);
 
 router.put("/:id", 
   validations.update,

@@ -39,7 +39,7 @@ module.exports = {
                 createdByType: req.user.type[0]
             };
 
-            const inventoryExists = await Models.Inventory.fcindOne({
+            const inventoryExists = await Models.Inventory.findOne({
                 retailer: inventoryData.retailer,
                 product: inventoryData.product,
                 batch: inventoryData.batch,
@@ -56,8 +56,8 @@ module.exports = {
 
             return universal.response(res, CODES.OK, MESSAGES.INVENTORY_CREATED, inventory, req.lang);
         } catch (error) {
-            console.error(error);
-            return universal.response(res, CODES.ERROR_SERVER, _.get(error, 'message', MESSAGES.ERROR.SERVER_ERROR), {}, req.lang);
+            console.log(error)
+            next(error);
         }
     },
 
@@ -134,15 +134,51 @@ module.exports = {
 
             return universal.response(res, result.status, result.message, result.data, req.lang);
         } catch (error) {
-            console.error(error);
-            return universal.response(res, CODES.ERROR_SERVER, _.get(error, 'message', MESSAGES.ERROR.SERVER_ERROR), {}, req.lang);
+            console.log(error)
+            next(error);
         }
     },
 
     getById: async (req, res, next) => {
         try {
+            // Get retailer ID from either path parameter or query parameter
+            console.log('INSIDE')
+            console.log(req.params)
+            const retailerId = req.params.id || req.query.id;
+
+            if (!retailerId) {
+                return universal.response(res, CODES.BAD_REQUEST, "Retailer ID is required", {}, req.lang);
+            }
+
+            // Validate if retailer exists and is active
+            const retailer = await Models.User.findOne({
+                _id: new ObjectId(retailerId),
+              
+                status: 'ACTIVE',
+                isDeleted: false
+            });
+            console.log(retailer)
+
+            if (!retailer) {
+                return universal.response(res, CODES.NOT_FOUND, MESSAGES.RETAILER_NOT_FOUND, {}, req.lang);
+            }
+
+            // Access control - retailers can only view their own inventory
+            if (req.userType === USER_TYPES.RETAILER_ADMIN && req.user._id.toString() !== retailerId) {
+                return universal.response(res, CODES.FORBIDDEN, MESSAGES.ACCESS_DENIED, {}, req.lang);
+            }
+
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const skip = (page - 1) * limit;
+
             const pipeline = [
-                { $match: { _id:new ObjectId(req.params.id), isDeleted: false } },
+                { 
+                    $match: { 
+                        retailer: new ObjectId(retailerId),
+                        isDeleted: false
+                    }
+                },
                 {
                     $lookup: {
                         from: 'products',
@@ -154,13 +190,22 @@ module.exports = {
                 { $unwind: '$productDetails' },
                 {
                     $lookup: {
-                        from: 'users',
-                        localField: 'retailer',
+                        from: 'categories',
+                        localField: 'productDetails.category',
                         foreignField: '_id',
-                        as: 'retailerDetails'
+                        as: 'categoryDetails'
                     }
                 },
-                { $unwind: '$retailerDetails' },
+                { $unwind: '$categoryDetails' },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'productDetails.manufacturer',
+                        foreignField: '_id',
+                        as: 'manufacturerDetails'
+                    }
+                },
+                { $unwind: '$manufacturerDetails' },
                 {
                     $lookup: {
                         from: 'batches',
@@ -169,33 +214,130 @@ module.exports = {
                         as: 'batchDetails'
                     }
                 },
-                { $unwind: { path: '$batchDetails', preserveNullAndEmptyArrays: true } },
                 {
-                    $project: {
-                        retailer: '$retailerDetails.name',
-                        retailerEmail: '$retailerDetails.email',
-                        product: '$productDetails.name',
-                        productDescription: '$productDetails.description',
-                        batchNumber: '$batchDetails.batchNumber',
-                        expiryDate: '$batchDetails.expiryDate',
-                        status: 1,
-                        quantity: 1,
-                        location: 1,
-                        createdAt: 1
+                    $unwind: {
+                        path: '$batchDetails',
+                        preserveNullAndEmptyArrays: true
                     }
-                }
+                },
+                {
+                    $lookup: {
+                        from: 'documents',
+                        localField: 'productDetails.photos',
+                        foreignField: '_id',
+                        as: 'productPhotos'
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        product: {
+                            $first: {
+                                _id: '$productDetails._id',
+                                name: '$productDetails.name',
+                                technicalName: '$productDetails.technicalName',
+                                sku: '$productDetails.sku',
+                                description: '$productDetails.description',
+                                marketedBy: '$productDetails.marketedBy',
+                                recommendedDose: '$productDetails.recommendedDose',
+                                registrationNumber: '$productDetails.registrationNumber',
+                                safetyInstructions: '$productDetails.safetyInstructions',
+                                antidote: '$productDetails.antidote',
+                                storageInstructions: '$productDetails.storageInstructions',
+                                hsnCode: '$productDetails.hsnCode',
+                                gstPercentage: '$productDetails.gstPercentage',
+                                status: '$productDetails.status',
+                                photos: '$productPhotos',
+                                packagingOptions: '$productDetails.packagingOptions'
+                            }
+                        },
+                        category: {
+                            $first: {
+                                _id: '$categoryDetails._id',
+                                name: '$categoryDetails.name'
+                            }
+                        },
+                        manufacturer: {
+                            $first: {
+                                _id: '$manufacturerDetails._id',
+                                name: '$manufacturerDetails.name',
+                                email: '$manufacturerDetails.email',
+                                phone: '$manufacturerDetails.phone'
+                            }
+                        },
+                        quantity: { $first: '$quantity' },
+                        purchasePrice: { $first: '$purchasePrice' },
+                        sellingPrice: { $first: '$sellingPrice' },
+                        discount: { $first: '$discount' },
+                        purchaseDate: { $first: '$purchaseDate' },
+                        purchasedInvoiceNumber: { $first: '$purchasedInvoiceNumber' },
+                        status: { $first: '$status' },
+                        minimumStockLevel: { $first: '$minimumStockLevel' },
+                        packagingSize: { $first: '$packagingSize' },
+                        batch: {
+                            $first: {
+                                _id: '$batchDetails._id',
+                                batchNumber: '$batchDetails.batchNumber',
+                                manufacturingDate: '$batchDetails.manufacturingDate',
+                                expiryDate: '$batchDetails.expiryDate'
+                            }
+                        },
+                        createdAt: { $first: '$createdAt' },
+                        updatedAt: { $first: '$updatedAt' }
+                    }
+                },
+                {
+                    $sort: { createdAt: -1 }
+                },
+                { $skip: skip },
+                { $limit: limit }
             ];
 
-            const inventory = await Models.Inventory.aggregate(pipeline).exec();
+            // Execute main query and count in parallel
+            const [inventory, totalCount] = await Promise.all([
+                Models.Inventory.aggregate(pipeline),
+                Models.Inventory.countDocuments({
+                    retailer: new ObjectId(retailerId),
+                    isDeleted: false
+                })
+            ]);
 
             if (!inventory.length) {
-                return universal.response(res, CODES.BAD_REQUEST, MESSAGES.PRODUCT_NOT_FOUND_IN_INVENTORY, {}, req.lang);
+                return universal.response(res, CODES.OK, MESSAGES.NO_INVENTORY_FOUND, {
+                    inventory: [],
+                    retailer: {
+                        _id: retailer._id,
+                        name: retailer.name,
+                        email: retailer.email,
+                        phone: retailer.phone
+                    },
+                    pagination: {
+                        total: 0,
+                        page,
+                        pages: 0
+                    }
+                }, req.lang);
             }
 
-            return universal.response(res, CODES.OK, MESSAGES.PRODUCT_FETCHED_FROM_INVENTORY, inventory[0], req.lang);
+            const response = {
+                inventory,
+                retailer: {
+                    _id: retailer._id,
+                    name: retailer.name,
+                    email: retailer.email,
+                    phone: retailer.phone
+                },
+                pagination: {
+                    total: totalCount,
+                    page,
+                    pages: Math.ceil(totalCount / limit)
+                }
+            };
+
+            return universal.response(res, CODES.OK, MESSAGES.INVENTORY_FETCHED_SUCCESSFULLY, response, req.lang);
         } catch (error) {
-            console.error(error);
-            return universal.response(res, CODES.BAD_GATEWAY, _.get(error, 'message', CODES.BAD_REQUEST), {}, req.lang);
+            console.error('Get Retailer Inventory Error:', error);
+            return universal.response(res, CODES.BAD_GATEWAY, _.get(error, 'message', MESSAGES.SOMETHING_WENT_WRONG), {}, req.lang);
         }
     },
 
@@ -284,8 +426,8 @@ module.exports = {
                 message: MESSAGES.INVENTORY.STATUS_UPDATED
             });
         } catch (error) {
-            console.error(error);
-            return universal.response(res, CODES.ERROR_SERVER, _.get(error, 'message', MESSAGES.ERROR.SERVER_ERROR), {}, req.lang);
+            console.log(error)
+            next(error);
         }
     },
 
@@ -302,11 +444,11 @@ module.exports = {
             return res.status(CODES.SUCCESS).json({
                 success: true,
                 data: inventory,
-                message: MESSAGES.SUCCESS.FETCHED
+                message: MESSAGES.LOW_STOCK_PRODUCT_FETCH
             });
         } catch (error) {
-            console.error(error);
-            return universal.response(res, CODES.ERROR_SERVER, _.get(error, 'message', MESSAGES.ERROR.SERVER_ERROR), {}, req.lang);
+            console.log(error)
+            next(error);
         }
     },
 
@@ -336,8 +478,8 @@ module.exports = {
                 message: MESSAGES.SUCCESS.FETCHED
             });
         } catch (error) {
-            console.error(error);
-            return universal.response(res, CODES.ERROR_SERVER, _.get(error, 'message', MESSAGES.ERROR.SERVER_ERROR), {}, req.lang);
+            console.log(error)
+            next(error);
         }
     },
 
@@ -350,8 +492,8 @@ module.exports = {
                 message: MESSAGES.INVENTORY.IMPORTED
             });
         } catch (error) {
-            console.error(error);
-            return universal.response(res, CODES.ERROR_SERVER, _.get(error, 'message', MESSAGES.ERROR.SERVER_ERROR), {}, req.lang);
+            console.log(error)
+            next(error);
         }
     },
 
@@ -367,8 +509,8 @@ module.exports = {
                 message: MESSAGES.SUCCESS.FETCHED
             });
         } catch (error) {
-            console.error(error);
-            return universal.response(res, CODES.ERROR_SERVER, _.get(error, 'message', MESSAGES.ERROR.SERVER_ERROR), {}, req.lang);
+            console.log(error)
+            next(error);
         }
     },
 
@@ -385,8 +527,8 @@ module.exports = {
                 message: MESSAGES.SUCCESS.FETCHED
             });
         } catch (error) {
-            console.error(error);
-            return universal.response(res, CODES.ERROR_SERVER, _.get(error, 'message', MESSAGES.ERROR.SERVER_ERROR), {}, req.lang);
+            console.log(error)
+            next(error);
         }
     }
 };

@@ -6,12 +6,16 @@ const { upload } = require('../services/fileUpload');
 
 // Product management routes
 router.post("/create", 
-  validations.create,
+ // validations.create,
   controllers.product.create
 );
 
 router.get("/", 
   controllers.product.getAll
+);
+
+router.get("/search", 
+  controllers.product.advancedSearch
 );
 
 router.get("/:id", 

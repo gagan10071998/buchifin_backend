@@ -47,17 +47,21 @@ const ProductSchema = new Schema({
     size: {
       type: Number,
       required: true
-    },
+    }, 
     unitOfMeasure: {
       type: String,
       enum: ['kg', 'g', 'liter', 'ml'],
       required: true
+    },
+    caseSize: {
+      type: Number,
+      required: false
     }
   }],
   recommendedDose: {
     type: String,
     trim: true,
-    required: true
+    required: false
   },
   registrationNumber: {
     type: String,
@@ -78,7 +82,7 @@ const ProductSchema = new Schema({
   safetyInstructions: {
     type: String,
     trim: true,
-    required: true
+    required: false
   },
   antidote: {
     type: String,
@@ -87,7 +91,7 @@ const ProductSchema = new Schema({
   storageInstructions: {
     type: String,
     trim: true,
-    required: true
+    required: false
   },
   hsnCode: {
     type: String,

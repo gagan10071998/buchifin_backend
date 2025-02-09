@@ -41,5 +41,28 @@
         "FORGOT": "FORGOT",
         "EMAIL_VERIFICATION": "EMAIL_VERIFICATION"
     },
-    "maxLoginsAllowed": 2
+    "maxLoginsAllowed": 2,
+    "REGEX_PATTERNS": {
+        "GSTIN": "^\\d{2}[A-Z]{5}\\d{4}[A-Z]{1}\\d[Z]{1}[A-Z\\d]{1}$"
+    },
+    "UNIT_TYPES": [
+        "kg",
+        "g",
+        "liter",
+        "ml",
+        "piece",
+        "box"
+    ],
+    "BUSINESS_RELATIONS": {
+        "RETAILER": [
+            "CUSTOMER",
+            "RETAILER"
+        ],
+        "DISTRIBUTOR": [
+            "RETAILER"
+        ],
+        "MANUFACTURER": [
+            "DISTRIBUTOR"
+        ]
+    }
 }

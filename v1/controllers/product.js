@@ -14,7 +14,8 @@ module.exports = {
   create: async (req, res, next) => {
     try {
       // Check if manufacturer exists and is active
-      console.log('BODY', req.body);
+      console.log('BODY--->', req.body);
+      console.log('USER--->', req.user);
       const manufacturer = await Models.User.findOne({
         _id: req.body.manufacturer,
         type: { $in: ["MANUFACTURER_ADMIN"] },
@@ -340,6 +341,119 @@ module.exports = {
     } catch (error) {
       console.error('Error:', error);
       res.status(500).send('Internal server error');
+    }
+  },
+
+  advancedSearch: async (req, res, next) => {
+    try {
+      const page = Math.max(1, parseInt(req.query.page) || 1);
+      const limit = Math.max(10, parseInt(req.query.limit) || 10);
+      const skip = (page - 1) * limit;
+
+      // Build search query
+      const query = { isDeleted: false };
+      const searchFields = [];
+
+      // Text search fields
+      if (req.query.name) {
+        searchFields.push({ name: { $regex: req.query.name, $options: 'i' } });
+      }
+      if (req.query.technicalName) {
+        searchFields.push({ technicalName: { $regex: req.query.technicalName, $options: 'i' } });
+      }
+      if (req.query.registrationNumber) {
+        searchFields.push({ registrationNumber: { $regex: req.query.registrationNumber, $options: 'i' } });
+      }
+      if (req.query.hsnCode) {
+        searchFields.push({ hsnCode: { $regex: req.query.hsnCode, $options: 'i' } });
+      }
+
+      // Exact match fields
+      if (req.query.category) {
+        query.category = new ObjectId(req.query.category);
+      }
+      if (req.query.manufacturer) {
+        query.manufacturer = new ObjectId(req.query.manufacturer);
+      }
+
+      // Combine search fields if any exist
+      if (searchFields.length > 0) {
+        query.$or = searchFields;
+      }
+
+      // If user is manufacturer, show only their products
+      if (req.userType === USER_TYPES.MANUFACTURER_ADMIN) {
+        query.manufacturer = req.user._id;
+      }
+
+      // Create aggregation pipeline
+      const pipeline = [
+        { $match: query },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: 'categoryDetails'
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'manufacturer',
+            foreignField: '_id',
+            as: 'manufacturerDetails'
+          }
+        },
+        { $unwind: '$categoryDetails' },
+        { $unwind: '$manufacturerDetails' },
+        {
+          $project: {
+            name: 1,
+            technicalName: 1,
+            sku: 1,
+            registrationNumber: 1,
+            hsnCode: 1,
+            description: 1,
+            status: 1,
+            marketedBy: 1,
+            packagingOptions: 1,
+            photos: 1,
+            category: {
+              _id: '$categoryDetails._id',
+              name: '$categoryDetails.name'
+            },
+            manufacturer: {
+              _id: '$manufacturerDetails._id',
+              name: '$manufacturerDetails.name',
+              email: '$manufacturerDetails.email'
+            },
+            createdAt: 1
+          }
+        },
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit }
+      ];
+
+      // Execute pipeline
+      const [products, totalCount] = await Promise.all([
+        Models.Product.aggregate(pipeline),
+        Models.Product.countDocuments(query)
+      ]);
+
+      return universal.response(res, CODES.OK, MESSAGES.DATA_FETCHED_SUCCESSFULLY, {
+        products,
+        pagination: {
+          total: totalCount,
+          page,
+          pages: Math.ceil(totalCount / limit)
+        }
+      });
+
+    } catch (error) {
+      console.error('Advanced Search Error:', error);
+      next(error);
     }
   }
 };

@@ -18,8 +18,7 @@ const InventorySchema = new Schema({
     index: true
   },
   batch: {
-    type: ObjectId,
-    ref: 'Batch',
+    type: String,
     required: false,
     index: true
   },
@@ -62,20 +61,20 @@ const InventorySchema = new Schema({
   purchasedInvoiceDocument: {
     type: ObjectId,
     ref: 'Document',
-    required: true
+    required: false
   },
-  location: {
-    warehouse: {
-      type: String,
-      required: true
-    },
-    rack: String,
-    shelf: String,
-    geolocation: {
-      type: { type: String, default: "Point" },
-      coordinates: { type: [Number], required: false } // [longitude, latitude]
-    }
-  },
+  //location: {
+    //warehouse: {
+      //type: String,
+     // required: false
+   // },
+    //rack: String,
+   // shelf: String,
+   // geolocation: {
+     // type: { type: String, default: "Point" },
+     // coordinates: { type: [Number], required: false } // [longitude, latitude]
+    //}
+  //},
   status: {
     type: String,
     enum: ["IN_STOCK", "LOW_STOCK", "OUT_OF_STOCK", "EXPIRED", "RECALLED"],
