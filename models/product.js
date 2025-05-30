@@ -98,10 +98,6 @@ const ProductSchema = new Schema({
     trim: true,
     required: true
   },
-  gstPercentage: {
-    type: Number,
-    required: true
-  },
   status: {
     type: String,
     enum: ["ACTIVE", "INACTIVE", "DISCONTINUED", "PENDING_APPROVAL"],

@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const _ = require("lodash");
 const Models = require("../../models");
 const universal = require("../../utils");
 const CODES = require("../../constants").Codes;
@@ -6,8 +6,46 @@ const MESSAGES = require("../../constants").Messages;
 const config = require("config");
 const USER_TYPES = Object.values(config.get("USER_TYPES"));
 const ObjectId = require("mongoose").Types.ObjectId;
+const csvParser = require("csv-parser");
+const mongoose = require("mongoose");
 
-// Add transaction logging
+// Import the InventoryLog model
+const InventoryLog = require("../../models/inventoryLog");
+
+// Helper: reserveInventory – used to deduct stock when an order is placed
+const reserveInventory = async (productId, requiredQty, retailerId, userId) => {
+    console.log(productId, requiredQty, retailerId, userId);
+    const inventoryItem = await Models.Inventory.findOne({
+        product: productId,
+        retailer: retailerId,
+        isDeleted: false
+    });
+    if (!inventoryItem) {
+        throw new Error("Inventory item not found for the selected product.");
+    }
+    console.log(inventoryItem);
+    if (inventoryItem.quantity < requiredQty) {
+        throw new Error(`Insufficient stock for product ${productId}`);
+    }
+    inventoryItem.quantity -= requiredQty;
+    await inventoryItem.save();
+    // Log the stock deduction as a sell action
+    await createInventoryLog(inventoryItem._id, "SELL", userId, { deducted: requiredQty });
+    return inventoryItem;
+};
+
+// Helper: createInventoryLog – creates a log entry for any inventory change
+const createInventoryLog = async (inventoryId, action, performedBy, changeDetails = {}, notes = "") => {
+    await new InventoryLog({
+        inventory: inventoryId,
+        action,
+        performedBy,
+        changeDetails,
+        notes
+    }).save();
+};
+
+// Transaction logging helper (if still needed)
 const logTransaction = async (inventoryId, productId, type, details, userId) => {
     await new Models.Transaction({
         inventory: inventoryId,
@@ -19,22 +57,26 @@ const logTransaction = async (inventoryId, productId, type, details, userId) => 
 };
 
 module.exports = {
+    // Expose reserveInventory for use by other controllers (e.g. Order)
+    reserveInventory,
+
+    // Add a new product to inventory
     addProductToInventory: async (req, res, next) => {
         try {
             const inventoryData = {
-                retailer: _.get(req.body, 'retailer'),
-                product: _.get(req.body, 'product'),
-                batch: _.get(req.body, 'batch'),
-                packagingSize: _.get(req.body, 'packagingSize', {}),
-                quantity: _.get(req.body, 'quantity', 0),
-                purchasePrice: _.get(req.body, 'purchasePrice', 0),
-                sellingPrice: _.get(req.body, 'sellingPrice', 0),
-                discount: _.get(req.body, 'discount', 0),
-                purchaseDate: _.get(req.body, 'purchaseDate'),
-                purchasedInvoiceNumber: _.get(req.body, 'purchasedInvoiceNumber'),
-                purchasedInvoiceDocument: _.get(req.body, 'purchasedInvoiceDocument'),
-                location: _.get(req.body, 'location', {}),
-                minimumStockLevel: _.get(req.body, 'minimumStockLevel', 0),
+                retailer: _.get(req.body, "retailer"),
+                product: _.get(req.body, "product"),
+                batch: _.get(req.body, "batch"),
+                packagingSize: _.get(req.body, "packagingSize", {}),
+                quantity: _.get(req.body, "quantity", 0),
+                purchasePrice: _.get(req.body, "purchasePrice", 0),
+                sellingPrice: _.get(req.body, "sellingPrice", 0),
+                discount: _.get(req.body, "discount", 0),
+                purchaseDate: _.get(req.body, "purchaseDate"),
+                purchasedInvoiceNumber: _.get(req.body, "purchasedInvoiceNumber"),
+                purchasedInvoiceDocument: _.get(req.body, "purchasedInvoiceDocument"),
+                location: _.get(req.body, "location", {}),
+                minimumStockLevel: _.get(req.body, "minimumStockLevel", 0),
                 createdBy: req.user._id,
                 createdByType: req.user.type[0]
             };
@@ -51,22 +93,24 @@ module.exports = {
             }
 
             const inventory = await new Models.Inventory(inventoryData).save();
-            // Log the transaction
-            await logTransaction(inventory._id, inventory.product, 'ADD', inventory.quantity, req.user._id);
+            await logTransaction(inventory._id, inventory.product, "ADD", inventory.quantity, req.user._id);
+
+            // Log the addition as an 'ADD' action
+            await createInventoryLog(inventory._id, "ADD", req.user._id, { quantity: inventory.quantity });
 
             return universal.response(res, CODES.OK, MESSAGES.INVENTORY_CREATED, inventory, req.lang);
         } catch (error) {
-            console.log(error)
+            console.log(error);
             next(error);
         }
     },
 
+    // List inventory items with pagination and search
     getAll: async (req, res, next) => {
         try {
             const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
             const limit = Math.max(10, Number.parseInt(req.query.limit, 10) || 10);
             const skip = (page - 1) * limit;
-
             const searchQuery = req.query.search || '';
 
             const pipeline = [
@@ -134,36 +178,27 @@ module.exports = {
 
             return universal.response(res, result.status, result.message, result.data, req.lang);
         } catch (error) {
-            console.log(error)
+            console.log(error);
             next(error);
         }
     },
 
+    // Get inventory details by retailer id (with pagination)
     getById: async (req, res, next) => {
         try {
-            // Get retailer ID from either path parameter or query parameter
-            console.log('INSIDE')
-            console.log(req.params)
             const retailerId = req.params.id || req.query.id;
-
             if (!retailerId) {
                 return universal.response(res, CODES.BAD_REQUEST, "Retailer ID is required", {}, req.lang);
             }
 
-            // Validate if retailer exists and is active
             const retailer = await Models.User.findOne({
                 _id: new ObjectId(retailerId),
-              
                 status: 'ACTIVE',
                 isDeleted: false
             });
-            console.log(retailer)
-
             if (!retailer) {
                 return universal.response(res, CODES.NOT_FOUND, MESSAGES.RETAILER_NOT_FOUND, {}, req.lang);
             }
-
-            // Access control - retailers can only view their own inventory
             if (req.userType === USER_TYPES.RETAILER_ADMIN && req.user._id.toString() !== retailerId) {
                 return universal.response(res, CODES.FORBIDDEN, MESSAGES.ACCESS_DENIED, {}, req.lang);
             }
@@ -173,8 +208,8 @@ module.exports = {
             const skip = (page - 1) * limit;
 
             const pipeline = [
-                { 
-                    $match: { 
+                {
+                    $match: {
                         retailer: new ObjectId(retailerId),
                         isDeleted: false
                     }
@@ -286,14 +321,11 @@ module.exports = {
                         updatedAt: { $first: '$updatedAt' }
                     }
                 },
-                {
-                    $sort: { createdAt: -1 }
-                },
+                { $sort: { createdAt: -1 } },
                 { $skip: skip },
                 { $limit: limit }
             ];
 
-            // Execute main query and count in parallel
             const [inventory, totalCount] = await Promise.all([
                 Models.Inventory.aggregate(pipeline),
                 Models.Inventory.countDocuments({
@@ -341,37 +373,32 @@ module.exports = {
         }
     },
 
+    // Update inventory by id
     updateById: async (req, res, next) => {
         try {
             const { id } = req.params;
             const updateFields = req.body;
 
-            // Check if inventory exists
             const inventory = await Models.Inventory.findOne({ _id: id, isDeleted: false });
             if (!inventory) {
                 return universal.response(res, CODES.BAD_REQUEST, MESSAGES.INVENTORY_NOT_FOUND, {}, req.lang);
             }
-
-            // Check if product exists in inventory
             if (updateFields.product && updateFields.product !== inventory.product.toString()) {
                 return universal.response(res, CODES.BAD_REQUEST, MESSAGES.PRODUCT_NOT_FOUND_IN_INVENTORY, {}, req.lang);
             }
 
-            // Prepare update data
             const updateData = {
                 updatedBy: req.user._id,
                 updatedByType: req.user.type[0]
             };
 
-            // Only update fields that are present in the request body
-            const allowedFields = ['price', 'discount', 'packagingSize', 'name', 'sellingPrice', 'purchasePrice', 'quantity', 'purchaseDate', 'purchasedInvoiceNumber', 'purchasedInvoiceDocument', 'location', 'minimumStockLevel'];
+            const allowedFields = ["price", "discount", "packagingSize", "name", "sellingPrice", "purchasePrice", "quantity", "purchaseDate", "purchasedInvoiceNumber", "purchasedInvoiceDocument", "location", "minimumStockLevel"];
             allowedFields.forEach(field => {
                 if (updateFields[field] !== undefined) {
                     updateData[field] = updateFields[field];
                 }
             });
 
-            // Update inventory
             const updatedInventory = await Models.Inventory.findOneAndUpdate(
                 { _id: id, isDeleted: false },
                 updateData,
@@ -382,17 +409,18 @@ module.exports = {
                 return universal.response(res, CODES.BAD_REQUEST, MESSAGES.INVENTORY_NOT_FOUND, {}, req.lang);
             }
 
-            // Log the update
             const changes = {};
             allowedFields.forEach(field => {
                 if (updateFields[field] !== undefined && updateFields[field] !== inventory[field]) {
-                    changes[field] = {
-                        oldValue: inventory[field],
-                        newValue: updateFields[field]
-                    };
+                    changes[field] = { oldValue: inventory[field], newValue: updateFields[field] };
                 }
             });
-            await logTransaction(new ObjectId(updatedInventory._id), new ObjectId(updatedInventory.product), 'UPDATE', changes, new ObjectId(req.user._id));
+
+            // Log the update in our transaction log...
+            await logTransaction(new ObjectId(updatedInventory._id), new ObjectId(updatedInventory.product), "UPDATE", changes, new ObjectId(req.user._id));
+
+            // And log in the InventoryLog as an "UPDATE" action
+            await createInventoryLog(updatedInventory._id, "UPDATE", req.user._id, changes);
 
             return universal.response(res, CODES.OK, MESSAGES.INVENTORY_UPDATED, updatedInventory, req.lang);
         } catch (error) {
@@ -401,6 +429,7 @@ module.exports = {
         }
     },
 
+    // Update inventory status
     updateStatus: async (req, res, next) => {
         try {
             const inventory = await Models.Inventory.findOneAndUpdate(
@@ -419,6 +448,7 @@ module.exports = {
                     message: MESSAGES.INVENTORY.NOT_FOUND
                 });
             }
+            await createInventoryLog(inventory._id, "UPDATE", req.user._id, { status: inventory.status });
 
             return res.status(CODES.SUCCESS).json({
                 success: true,
@@ -426,11 +456,12 @@ module.exports = {
                 message: MESSAGES.INVENTORY.STATUS_UPDATED
             });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             next(error);
         }
     },
 
+    // Get low stock inventory items
     getLowStock: async (req, res, next) => {
         try {
             const inventory = await Models.Inventory.find({
@@ -447,11 +478,12 @@ module.exports = {
                 message: MESSAGES.LOW_STOCK_PRODUCT_FETCH
             });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             next(error);
         }
     },
 
+    // Get inventory items near a given location
     getNearby: async (req, res, next) => {
         try {
             const { longitude, latitude, maxDistance = 10000 } = req.query;
@@ -478,25 +510,25 @@ module.exports = {
                 message: MESSAGES.SUCCESS.FETCHED
             });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             next(error);
         }
     },
 
+    // Import inventory from file (placeholder implementation)
     importInventory: async (req, res, next) => {
         try {
-            // Implementation for importing inventory from file
-            // Similar to product import but for inventory items
             return res.status(CODES.SUCCESS).json({
                 success: true,
                 message: MESSAGES.INVENTORY.IMPORTED
             });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             next(error);
         }
     },
 
+    // Get transaction log for a specific inventory item
     getTransactions: async (req, res, next) => {
         try {
             const transactions = await Models.Transaction.find({
@@ -509,11 +541,12 @@ module.exports = {
                 message: MESSAGES.SUCCESS.FETCHED
             });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             next(error);
         }
     },
 
+    // Get inventory items for a given product id
     getByProduct: async (req, res, next) => {
         try {
             const inventoryItems = await Models.Inventory.find({
@@ -527,8 +560,11 @@ module.exports = {
                 message: MESSAGES.SUCCESS.FETCHED
             });
         } catch (error) {
-            console.log(error)
+            console.log(error);
             next(error);
         }
-    }
+    },
+
+    // Expose reserveInventory for use by other controllers (e.g. Order)
+    reserveInventory
 };

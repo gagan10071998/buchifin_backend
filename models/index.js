@@ -10,5 +10,7 @@ module.exports = {
     Category: require('./category'),
     Product: require('./product'),
     Inventory: require('./inventory'),
-    Transaction: require('./transaction')
+    Transaction: require('./transaction'),
+    Order: require('./order'),
+    InventoryLog: require('./inventoryLog')
 }

@@ -11,6 +11,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 module.exports = {
+  // Create a new product
   create: async (req, res, next) => {
     try {
       // Check if manufacturer exists and is active
@@ -27,21 +28,18 @@ module.exports = {
 
       // Check if category exists
       const category = await Models.Category.findById(req.body.category);
-      console.log(category)
       if (!category) {
         return universal.response(res, MESSAGES.CATEGORY_NOT_FOUND, "Invalid category", {});
       }
 
       // Check for unique SKU
       const existingSku = await Models.Product.findOne({ sku: req.body.sku });
-      console.log('SKU', existingSku)
       if (existingSku) {
           return universal.response(res, MESSAGES.SKU_ALREADY_EXISTS, "SKU already exists", {});
       }
 
       req.body.createdBy = req.user._id;
       req.body.createdByType = req.userType;
-      
       // Set initial status based on user type
       req.body.status = req.userType === USER_TYPES.SUPER_ADMIN ? "ACTIVE" : "PENDING_APPROVAL";
 
@@ -54,6 +52,7 @@ module.exports = {
     }
   },
 
+  // Get list of products with filters and pagination
   getAll: async (req, res, next) => {
     try {
       const page = parseInt(req.query.page) || 1;
@@ -65,10 +64,6 @@ module.exports = {
 
       let query = { isDeleted: false };
 
-      // Add filters
-
-
-      
       if (search) {
         query.$or = [
           { name: { $regex: search, $options: 'i' } },
@@ -80,7 +75,7 @@ module.exports = {
       if (manufacturer) query.manufacturer = new ObjectId(manufacturer);
       if (status) query.status = status;
 
-      // If user is manufacturer, show only their products
+      // If user is a manufacturer admin, show only their products
       if (req.userType === USER_TYPES.MANUFACTURER_ADMIN) {
         query.manufacturer = req.user._id;
       }
@@ -108,6 +103,7 @@ module.exports = {
     }
   },
 
+  // Get product details by id
   getById: async (req, res, next) => {
     try {
       const product = await Models.Product.findOne({ 
@@ -124,7 +120,7 @@ module.exports = {
         return universal.response(res, CODES.NOT_FOUND, MESSAGES.PRODUCT_NOT_FOUND, {});
       }
 
-      // Check if user has access to view this product
+      // For manufacturer admins, ensure they only access their own products
       if (req.userType === USER_TYPES.MANUFACTURER_ADMIN && 
           product.manufacturer._id.toString() !== req.user._id.toString()) {
         return universal.response(res, CODES.FORBIDDEN, "Access denied", {});
@@ -137,6 +133,7 @@ module.exports = {
     }
   },
 
+  // Approve product (only by SUPER_ADMIN)
   approve: async (req, res, next) => {
     try {
       if (req.userType !== USER_TYPES.SUPER_ADMIN) {
@@ -164,6 +161,7 @@ module.exports = {
     }
   },
 
+  // Update product status
   updateStatus: async (req, res, next) => {
     try {
       const { status } = req.body;
@@ -172,12 +170,10 @@ module.exports = {
       }
 
       const product = await Models.Product.findOne({ _id: new ObjectId(req.params.id) });
-      
       if (!product) {
         return universal.response(res, CODES.NOT_FOUND, MESSAGES.PRODUCT_NOT_FOUND, {});
       }
 
-      // Check authorization
       if (req.userType === USER_TYPES.MANUFACTURER_ADMIN && 
           product.manufacturer.toString() !== req.user._id.toString()) {
         return universal.response(res, CODES.FORBIDDEN, "Access denied", {});
@@ -195,6 +191,7 @@ module.exports = {
     }
   },
 
+  // Update product by id
   updateById: async (req, res, next) => {
     try {
       const product = await Models.Product.findOne({ 
@@ -206,13 +203,11 @@ module.exports = {
         return universal.response(res, CODES.NOT_FOUND, MESSAGES.PRODUCT_NOT_FOUND, {});
       }
 
-      // Check if user has permission to update this product
       if (req.userType === USER_TYPES.MANUFACTURER_ADMIN && 
           product.manufacturer.toString() !== req.user._id.toString()) {
         return universal.response(res, CODES.FORBIDDEN, "Access denied", {});
       }
 
-      // If updating manufacturer, check if new manufacturer exists and is active
       if (req.body.manufacturer) {
         const manufacturer = await Models.User.findOne({
           _id: req.body.manufacturer,
@@ -224,7 +219,6 @@ module.exports = {
         }
       }
 
-      // If updating category, check if new category exists
       if (req.body.category) {
         const category = await Models.Category.findById(req.body.category);
         if (!category) {
@@ -232,7 +226,6 @@ module.exports = {
         }
       }
 
-      // If updating SKU, check for uniqueness
       if (req.body.sku && req.body.sku !== product.sku) {
         const existingSku = await Models.Product.findOne({ sku: req.body.sku });
         if (existingSku) {
@@ -260,8 +253,9 @@ module.exports = {
     }
   },
 
+  // Import products from CSV in batches
   importProducts: async (req, res, next) => {
-    const batchSize = 1000; // Number of records to process in each batch
+    const batchSize = 1000;
     const products = [];
 
     try {
@@ -269,15 +263,13 @@ module.exports = {
         return res.status(400).send('No file uploaded');
       }
 
-      // Create a readable stream from the buffer
       const stream = require('stream');
       const bufferStream = new stream.PassThrough();
       bufferStream.end(req.file.buffer);
 
       bufferStream.pipe(csvParser())
         .on('data', (row) => {
-          console.log(row)
-          console.log(new mongoose.Types.ObjectId(row.category))
+          console.log(row);
           // Transform CSV row to match your schema
           const product = {
             sku: row.sku,
@@ -286,7 +278,6 @@ module.exports = {
             category: new mongoose.Types.ObjectId(row.category),
             manufacturer: new mongoose.Types.ObjectId(row.manufacturer),
             marketedBy: row.marketedBy,
-            //photos: row.photos.split('|').map(photo => new mongoose.Types.ObjectId(photo)),
             packagingOptions: row.packagingSize.split('|').map((size, index) => ({
               size: Number(size),
               unitOfMeasure: row.packagingUnit.split('|')[index],
@@ -297,15 +288,15 @@ module.exports = {
               ingredient,
               percentage: Number(row.ingredientPercentage.split('|')[index])
             })),
-            recommendedDose: 'Default Dose', // Add default or derived values
-            registrationNumber: Math.floor(Math.random() * 1000000), // Add default or derived values
-            description: 'Default Description', // Add default or derived values
-            safetyInstructions: 'Default Safety Instructions', // Add default or derived values
-            storageInstructions: 'Default Storage Instructions', // Add default or derived values
-            hsnCode: 'Default HSN', // Add default or derived values
-            gstPercentage: 18, // Add default or derived values
-            createdBy: req.user._id, // Assuming user is available in req
-            createdByType: req.userType // Assuming userType is available in req
+            recommendedDose: 'Default Dose',
+            registrationNumber: Math.floor(Math.random() * 1000000),
+            description: 'Default Description',
+            safetyInstructions: 'Default Safety Instructions',
+            storageInstructions: 'Default Storage Instructions',
+            hsnCode: 'Default HSN',
+            gstPercentage: 18,
+            createdBy: req.user._id,
+            createdByType: req.userType
           };
 
           products.push(product);
@@ -314,7 +305,7 @@ module.exports = {
             bufferStream.pause();
             Models.Product.insertMany(products, { ordered: false })
               .then(() => {
-                products.length = 0; // Clear the array
+                products.length = 0;
                 bufferStream.resume();
               })
               .catch(err => {
@@ -344,17 +335,16 @@ module.exports = {
     }
   },
 
+  // Advanced search using aggregation
   advancedSearch: async (req, res, next) => {
     try {
       const page = Math.max(1, parseInt(req.query.page) || 1);
       const limit = Math.max(10, parseInt(req.query.limit) || 10);
       const skip = (page - 1) * limit;
 
-      // Build search query
       const query = { isDeleted: false };
       const searchFields = [];
 
-      // Text search fields
       if (req.query.name) {
         searchFields.push({ name: { $regex: req.query.name, $options: 'i' } });
       }
@@ -368,7 +358,6 @@ module.exports = {
         searchFields.push({ hsnCode: { $regex: req.query.hsnCode, $options: 'i' } });
       }
 
-      // Exact match fields
       if (req.query.category) {
         query.category = new ObjectId(req.query.category);
       }
@@ -376,17 +365,14 @@ module.exports = {
         query.manufacturer = new ObjectId(req.query.manufacturer);
       }
 
-      // Combine search fields if any exist
       if (searchFields.length > 0) {
         query.$or = searchFields;
       }
 
-      // If user is manufacturer, show only their products
       if (req.userType === USER_TYPES.MANUFACTURER_ADMIN) {
         query.manufacturer = req.user._id;
       }
 
-      // Create aggregation pipeline
       const pipeline = [
         { $match: query },
         {
@@ -436,7 +422,6 @@ module.exports = {
         { $limit: limit }
       ];
 
-      // Execute pipeline
       const [products, totalCount] = await Promise.all([
         Models.Product.aggregate(pipeline),
         Models.Product.countDocuments(query)

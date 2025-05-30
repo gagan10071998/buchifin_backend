@@ -8,5 +8,6 @@ module.exports = {
     document: require('./document'),
     category: require('./category'),
     product: require('./product'),
-    inventory: require('./inventory')
+    inventory: require('./inventory'),
+    order: require('./orders')
 }

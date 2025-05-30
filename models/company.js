@@ -1,22 +1,16 @@
-const config = require("config");
-const mongoose = require('mongoose');
+// models/Company.js
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId;
+const config = require("config");
 const USER_TYPES = Object.values(config.get("USER_TYPES"));
-const CompanyModel = new Schema({
-    name: {
-        type: String
-    },
+
+const CompanySchema = new Schema({
+    name: { type: String, required: true },
     address: [{
-        addressType: {
-            type: String
-        },
-        lat: {
-            type: Number
-        },
-        long: {
-            type: Number
-        },
+        addressType: { type: String },
+        lat: { type: Number },
+        long: { type: Number },
         address: String,
         city: String,
         state: String,
@@ -25,142 +19,66 @@ const CompanyModel = new Schema({
         zip: String,
     }],
     registrationCertificate: {
-        number: {
-            type: String
-        },
+        number: { type: String },
         doc: {
-            front: {
-                type: ObjectId,
-                ref: 'Document'
-            },
-            back: {
-                type: ObjectId,
-                ref: 'Document'
-            }
+            front: { type: ObjectId, ref: 'Document' },
+            back: { type: ObjectId, ref: 'Document' }
         },
         note: { type: String }
     },
-    authorizedPersons: [{
-        type: ObjectId,
-        ref: 'User'
-    }],
+    authorizedPersons: [{ type: ObjectId, ref: 'User' }],
     license: {
-        number: {
-            type: String
-        },
+        number: { type: String },
         doc: {
-            front: {
-                type: ObjectId,
-                ref: 'Document'
-            },
-            back: {
-                type: ObjectId,
-                ref: 'Document'
-            }
+            front: { type: ObjectId, ref: 'Document' },
+            back: { type: ObjectId, ref: 'Document' }
         },
         note: { type: String }
     },
     gst: {
-        number: {
-            type: String
-        },
+        number: { type: String },
         doc: {
-            front: {
-                type: ObjectId,
-                ref: 'Document'
-            },
-            back: {
-                type: ObjectId,
-                ref: 'Document'
-            }
+            front: { type: ObjectId, ref: 'Document' },
+            back: { type: ObjectId, ref: 'Document' }
         },
         note: { type: String }
     },
     aadhaar: {
-        number: {
-            type: String
-        },
+        number: { type: String },
         doc: {
-            front: {
-                type: ObjectId,
-                ref: 'Document'
-            },
-            back: {
-                type: ObjectId,
-                ref: 'Document'
-            }
+            front: { type: ObjectId, ref: 'Document' },
+            back: { type: ObjectId, ref: 'Document' }
         },
         note: { type: String }
     },
     pan: {
-        number: {
-            type: String
-        },
+        number: { type: String },
         doc: {
-            front: {
-                type: ObjectId,
-                ref: 'Document'
-            },
-            back: {
-                type: ObjectId,
-                ref: 'Document'
-            }
+            front: { type: ObjectId, ref: 'Document' },
+            back: { type: ObjectId, ref: 'Document' }
         },
         note: { type: String }
     },
     bankDetails: {
-        accountName: {
-            type: String
-        },
-        accountNumber: {
-            type: String
-        },
-        ifscCode: {
-            type: String
-        },
-        bankName: {
-            type: String
-        },
+        accountName: { type: String },
+        accountNumber: { type: String },
+        ifscCode: { type: String },
+        bankName: { type: String },
         cancelCheque: {
-            front: {
-                type: ObjectId,
-                ref: 'Document'
-            },
-            back: {
-                type: ObjectId,
-                ref: 'Document'
-            }
+            front: { type: ObjectId, ref: 'Document' },
+            back: { type: ObjectId, ref: 'Document' }
         },
         note: { type: String }
     },
-    directors: [{
-        type: ObjectId,
-        ref: 'User'
-    }],
-    proprietors: [{
-        type: ObjectId,
-        ref: 'User'
-    }],
-    partners: [{
-        type: ObjectId,
-        ref: 'User'
-    }],
+    directors: [{ type: ObjectId, ref: 'User' }],
+    proprietors: [{ type: ObjectId, ref: 'User' }],
+    partners: [{ type: ObjectId, ref: 'User' }],
     documents: [{
-        label: {
-            type: String
-        },
-        number: {
-            type: String
-        },
+        label: { type: String },
+        number: { type: String },
         doc: {
-            front: {
-                type: ObjectId,
-                ref: 'Document'
-            },
-            back: {
-                type: ObjectId,
-                ref: 'Document'
-            }
+            front: { type: ObjectId, ref: 'Document' },
+            back: { type: ObjectId, ref: 'Document' }
         },
         note: { type: String }
     }],
@@ -169,59 +87,37 @@ const CompanyModel = new Schema({
         enum: ["Proprietorship", "Partnership", "PvtLimited"],
         required: true,
     },
-    associateTo: {
-        type: ObjectId,
-        ref: 'User'
-    },
-    associateType: {
-        type: String,
-        enum: USER_TYPES
-    },
+    associateTo: { type: ObjectId, ref: 'User' },
+    associateType: { type: String, enum: USER_TYPES },
     status: {
         type: String,
         enum: ['ACTIVE', 'INACTIVE', 'BLOCKED', 'PENDING', 'REJECTED'],
         default: 'ACTIVE'
     },
-    isDeleted: {
-        type: Boolean,
-        default: false
-    },
-    createdBy: {
-        type: ObjectId,
-        ref: 'User'
-    },
-    createdByType: {
-        type: String,
-        enum: USER_TYPES
-    },
-    updateBy: {
-        type: ObjectId,
-        ref: 'User'
-    },
-    updatedByType: {
-        type: String,
-        enum: USER_TYPES
-    }
+    isDeleted: { type: Boolean, default: false },
+    createdBy: { type: ObjectId, ref: 'User' },
+    createdByType: { type: String, enum: USER_TYPES },
+    updatedBy: { type: ObjectId, ref: 'User' },
+    updatedByType: { type: String, enum: USER_TYPES }
 }, {
     timestamps: true,
     toObject: { virtuals: true },
     toJSON: { virtuals: true }
 });
 
-CompanyModel.pre('find', function (next) {
+CompanySchema.pre('find', function (next) {
     this.where({ isDeleted: false });
     next();
 });
 
-CompanyModel.pre('findOne', function (next) {
+CompanySchema.pre('findOne', function (next) {
     this.where({ isDeleted: false });
     next();
 });
 
-CompanyModel.pre('findOneAndUpdate', function (next) {
+CompanySchema.pre('findOneAndUpdate', function (next) {
     this.where({ isDeleted: false });
     next();
 });
 
-const Company = mongoose.model('Company', CompanyModel);
-module.exports = Company;
+module.exports = mongoose.model("Company", CompanySchema);
