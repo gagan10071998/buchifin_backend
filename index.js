@@ -17,11 +17,33 @@ Initialize Server
 */
 let server = require("http").createServer(app);
 
-/* 
-Socket Initialization
-*/
-// const { io } = require("./utils/Sockets");
-// io.attach(server);
+const startServer = async (retryCount = 0) => {
+    try {
+        await server.listen(config.get('PORT'));
+        console.log(`****************************************** ${'ENVIRONMENT:::' + process.env.NODE_ENV} *******************************************************`);
+        console.log(`****************************************** ${'PORT:::' + config.get('PORT')} *******************************************************`);
+    } catch (err) {
+        if (err.code === 'EADDRINUSE') {
+            console.log(`Port ${config.get('PORT')} is busy, attempting to kill the process...`);
+            
+            // Try to kill the process using the port
+            const { execSync } = require('child_process');
+            try {
+                execSync(`lsof -ti :${config.get('PORT')} | xargs kill -9`);
+                console.log('Successfully killed the process');
+                
+                // Retry starting the server after a brief delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (retryCount < 3) {
+                    return startServer(retryCount + 1);
+                }
+            } catch (killError) {
+                console.error('Failed to kill the process:', killError.message);
+            }
+        }
+        //throw err;
+    }
+};
 
 /*
 Database Connection
@@ -31,23 +53,26 @@ mongoose.connect(config.get('DB_URL'), { useNewUrlParser: true, useUnifiedTopolo
         console.log(`****************************************** MONGODB CONNECTED ***********************************************`);
         try {
             await seed.createSuperAdmin();
-            await seed.createPermissions();
-        } catch (seedError) {
-            console.error("Error while seeding data:", seedError);
-            process.exit(1); // Exit the process with an error code
+            //await seed.createPermissions();
+            //await seed.seedCategories();
+            await startServer();
+        } catch (error) {
+            console.error("Error during startup:", error);
+            process.exit(1);
         }
-
-        // Start the server after the database connection and seed data population
-        server.listen(config.get('PORT'), () => {
-            console.log(`****************************************** ${'ENVIRONMENT:::' + process.env.NODE_ENV} *******************************************************`);
-            console.log(`****************************************** ${'PORT:::' + config.get('PORT')} *******************************************************`);
-        });
-
     })
     .catch((err) => {
         console.error("MongoDB connection error:", err.message);
-        process.exit(1); // Exit the process with an error code
+        process.exit(1);
     });
+
+// Handle process termination
+process.on('SIGTERM', () => {
+    server.close(() => {
+        console.log('Server terminated');
+        process.exit(0);
+    });
+});
 
 /* 
 View Engine Setup

@@ -1,13 +1,14 @@
 {
+    "version": "0.2.0",
     "configurations": [
-    {
-        "name": "Launch Program",
-        "program": "${workspaceFolder}/index.js",
-        "request": "launch",
-        "skipFiles": [
-            "<node_internals>/**"
-        ],
-        "type": "node"
-    }
+        {
+            "name": "Launch Program",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/index.js",
+            "skipFiles": ["<node_internals>/**"],
+            "console": "integratedTerminal",
+            "runtimeExecutable": "/home/kartik/.nvm/versions/node/v16.0.0/bin/node"
+        }
     ]
 }

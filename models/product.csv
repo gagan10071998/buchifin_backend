@@ -1,0 +1,31 @@
+sku,name,technicalName,category,manufacturer,marketedBy,photos,packagingSize,packagingUnit,mrp,dealerPrice,ingredientName,ingredientPercentage
+INS001,MaxKill Pro,Chlorpyrifos 20% EC,6766be47c213c21aae87fc2f,6766ae060114ae61a9be6b07,AgroChem Solutions,photo1.jpg,1|5,liter|liter,800|3500,720|3150,Chlorpyrifos|Emulsifiers,20|80
+HRB001,WeedClear Plus,Glyphosate 41% SL,6766be47c213c21aae87fc32,6766ae060114ae61a9be6b07,GreenField Corp,photo2.jpg,500|1000,ml|ml,450|800,405|720,Glyphosate|Surfactants,41|59
+FNG001,FungiShield,Carbendazim 50% WP,6766be47c213c21aae87fc35,6766ae060114ae61a9be6b07,CropGuard Inc,photo3.jpg,100|250,g|g,300|700,270|630,Carbendazim|Inert Materials,50|50
+BIO001,BioGrow Plus,Azotobacter 1%,6766be47c213c21aae87fc3e,6766ae060114ae61a9be6b07,OrganicLife Ltd,photo4.jpg,500|1000,g|g,200|350,180|315,Azotobacter|Carrier Material,1|99
+ORF001,VermiFert,Organic Compost,6766be47c213c21aae87fc38,6766ae060114ae61a9be6b07,EcoFarms,photo5.jpg,1|5,kg|kg,100|450,90|405,Vermicompost|Organic Matter,70|30
+CHF001,UreaMax,Urea 46%,6766be47c213c21aae87fc3b,6766ae060114ae61a9be6b07,ChemFert Ltd,photo6.jpg,10|25,kg|kg,500|1200,450|1080,Urea|Coating Material,46|54
+GRP001,GrowthBoost,GA3 0.001% L,6766be47c213c21aae87fc41,6766ae060114ae61a9be6b07,PlantCare Inc,photo7.jpg,100|250,ml|ml,1200|2800,1080|2520,Gibberellic Acid|Stabilizers,0.001|99.999
+INH001,GrowStop,Maleic Hydrazide 50%,6766be47c213c21aae87fc44,6766ae060114ae61a9be6b07,AgriTech Solutions,photo8.jpg,250|500,ml|ml,900|1700,810|1530,Maleic Hydrazide|Carriers,50|50
+HYB001,SuperCorn F1,Hybrid Maize Seeds,6766be47c213c21aae87fc47,6766ae060114ae61a9be6b07,SeedTech Corp,photo9.jpg,1|5,kg|kg,750|3500,675|3150,Hybrid Corn|Treatment Material,98|2
+GMO001,BtCotton Pro,GMO Cotton Seeds,6766be47c213c21aae87fc4a,6766ae060114ae61a9be6b07,GeneTech Seeds,photo10.jpg,500|1000,g|g,1500|2800,1350|2520,GMO Cotton|Coating,95|5
+INS002,PyriForce,Cypermethrin 10% EC,6766be47c213c21aae87fc2f,6766ae060114ae61a9be6b07,AgroChem Solutions,photo11.jpg,500|1000,ml|ml,600|1100,540|990,Cypermethrin|Solvents,10|90
+HRB002,WeedKill Ultra,2,4-D Sodium 80% WP,6766be47c213c21aae87fc32,6766ae060114ae61a9be6b07,GreenField Corp,photo12.jpg,250|500,g|g,400|750,360|675,2-4-D Sodium|Carriers,80|20
+FNG002,BlightGuard,Metalaxyl 35% WS,6766be47c213c21aae87fc35,6766ae060114ae61a9be6b07,CropGuard Inc,photo13.jpg,100|250,g|g,800|1800,720|1620,Metalaxyl|Wetting Agents,35|65
+BIO002,RhizoFix,Rhizobium 1%,6766be47c213c21aae87fc3e,6766ae060114ae61a9be6b07,OrganicLife Ltd,photo14.jpg,200|500,g|g,150|350,135|315,Rhizobium|Carrier Base,1|99
+ORF002,BoneMax,Bone Meal Fertilizer,6766be47c213c21aae87fc38,6766ae060114ae61a9be6b07,EcoFarms,photo15.jpg,1|5,kg|kg,200|900,180|810,Bone Meal|Organic Matter,80|20
+CHF002,DAP Plus,Di-ammonium Phosphate,6766be47c213c21aae87fc3b,6766ae060114ae61a9be6b07,ChemFert Ltd,photo16.jpg,25|50,kg|kg,1200|2300,1080|2070,DAP|Conditioners,46|54
+GRP002,CytoPro,Cytokinin 0.01%,6766be47c213c21aae87fc41,6766ae060114ae61a9be6b07,PlantCare Inc,photo17.jpg,100|250,ml|ml,900|2100,810|1890,Cytokinin|Stabilizers,0.01|99.99
+INH002,BudNip,Chlormequat Chloride 50%,6766be47c213c21aae87fc44,6766ae060114ae61a9be6b07,AgriTech Solutions,photo18.jpg,500|1000,ml|ml,700|1300,630|1170,Chlormequat|Carriers,50|50
+HYB002,WheatKing F1,Hybrid Wheat Seeds,6766be47c213c21aae87fc47,6766ae060114ae61a9be6b07,SeedTech Corp,photo19.jpg,2|5,kg|kg,1200|2800,1080|2520,Hybrid Wheat|Treatment,97|3
+GMO002,BtBrinjal Elite,GMO Brinjal Seeds,6766be47c213c21aae87fc4a,6766ae060114ae61a9be6b07,GeneTech Seeds,photo20.jpg,100|250,g|g,800|1800,720|1620,GMO Brinjal|Coating,96|4
+INS003,AcePhos,Acephate 75% SP,6766be47c213c21aae87fc2f,6766ae060114ae61a9be6b07,AgroChem Solutions,photo21.jpg,500|1000,g|g,550|1000,495|900,Acephate|Carriers,75|25
+HRB003,GrassClear,Paraquat 24% SL,6766be47c213c21aae87fc32,6766ae060114ae61a9be6b07,GreenField Corp,photo22.jpg,1|5,liter|liter,700|3200,630|2880,Paraquat|Surfactants,24|76
+FNG003,RustShield,Propiconazole 25% EC,6766be47c213c21aae87fc35,6766ae060114ae61a9be6b07,CropGuard Inc,photo23.jpg,250|500,ml|ml,900|1700,810|1530,Propiconazole|Solvents,25|75
+BIO003,PSBMax,Phosphate Solubilizing Bacteria,6766be47c213c21aae87fc3e,6766ae060114ae61a9be6b07,OrganicLife Ltd,photo24.jpg,250|500,g|g,180|350,162|315,PSB|Carrier Base,2|98
+ORF003,NeemCake Pro,Neem Cake Fertilizer,6766be47c213c21aae87fc38,6766ae060114ae61a9be6b07,EcoFarms,photo25.jpg,1|5,kg|kg,150|700,135|630,Neem Cake|Organic Matter,85|15
+CHF003,NPK Gold,NPK 19:19:19,6766be47c213c21aae87fc3b,6766ae060114ae61a9be6b07,ChemFert Ltd,photo26.jpg,1|5,kg|kg,250|1100,225|990,NPK Complex|Fillers,57|43
+GRP003,AuxinPlus,IAA 0.015%,6766be47c213c21aae87fc41,6766ae060114ae61a9be6b07,PlantCare Inc,photo27.jpg,100|250,ml|ml,800|1800,720|1620,IAA|Stabilizers,0.015|99.985
+INH003,RetardMax,Paclobutrazol 23% SC,6766be47c213c21aae87fc44,6766ae060114ae61a9be6b07,AgriTech Solutions,photo28.jpg,100|250,ml|ml,1200|2800,1080|2520,Paclobutrazol|Carriers,23|77
+HYB003,SunflowerElite F1,Hybrid Sunflower Seeds,6766be47c213c21aae87fc47,6766ae060114ae61a9be6b07,SeedTech Corp,photo29.jpg,500|1000,g|g,900|1700,810|1530,Hybrid Sunflower|Treatment,98|2
+GMO003,GoldCorn Plus,GMO Corn Seeds,6766be47c213c21aae87fc4a,6766ae060114ae61a9be6b07,GeneTech Seeds,photo30.jpg,1|2,kg|kg,2000|3800,1800|3420,GMO Corn|Coating,97|3

@@ -79,4 +79,28 @@ module.exports = {
     }).xor('email', 'phone').with('phone', ['countryCode']);
     return await validateSchema(req[property], schema);
   },
+  validateEmailVerification: async (req, property) => {
+    const schema = joi.object({
+      email: joi.string().email().required().messages({
+        'string.email': 'Invalid email format',
+        'any.required': 'Email is required'
+      })
+    });
+    return await validateSchema(req[property], schema);
+  },
+  validatePhoneVerification: async (req, property) => {
+    const schema = joi.object({
+      phone: joi.string().required(),
+      countryCode: joi.string().required()
+    });
+    return await validateSchema(req[property], schema);
+  },
+  validateVerifyPhone: async (req, property) => {
+    const schema = joi.object({
+      phone: joi.string().required(),
+      countryCode: joi.string().required(),
+      otp: joi.string().length(6).required()
+    });
+    return await validateSchema(req[property], schema);
+  }
 };

@@ -258,4 +258,100 @@ module.exports = {
             }
         },
     },
+    '/api/v1/auth/send-email-verification': {
+        "ALL": {
+            "POST": {
+                "auth": false,
+                "value": true,
+                "code": 7
+            }
+        }
+    },
+    '/api/v1/auth/verify-email': {
+        "ALL": {
+            "POST": {
+                "auth": false,
+                "value": true,
+                "code": 8
+            }
+        }
+    },
+    '/api/v1/auth/send-phone-verification': {
+        "ALL": {
+            "POST": {
+                "auth": false,
+                "value": true,
+                "code": 9
+            }
+        }
+    },
+    '/api/v1/auth/verify-phone': {
+        "ALL": {
+            "POST": {
+                "auth": false,
+                "value": true,
+                "code": 10
+            }
+        }
+    },
+    '/api/v1/product/create': {
+        "ALL": {
+            "POST": {
+                "auth": true,
+                "value": true,
+                "code": 11
+            },
+            "GET": {
+                "auth": true,
+                "value": true,
+                "code": 12
+            }
+        }
+    },
+    '/api/v1/product/:id': {
+        "ALL": {
+            "GET": {
+                "auth": true,
+                "value": true,
+                "code": 13
+            },
+            "PUT": {
+                "auth": true,
+                "value": true,
+                "code": 14
+            },
+            "DELETE": {
+                "auth": true,
+                "value": true,
+                "code": 15
+            }
+        }
+    },
+    '/api/v1/product/:id/approve': {
+        "SUPER_ADMIN": {
+            "PUT": {
+                "auth": true,
+                "value": true,
+                "code": 16
+            }
+        }
+    },
+    '/api/v1/product/:id/status': {
+        "ALL": {
+            "PUT": {
+                "auth": true,
+                "value": true,
+                "code": 17
+            }
+        }
+    },
+    '/api/v1/product/import': {
+        "SUPER_ADMIN": {
+            "POST": {
+                "auth": true,
+                "value": true,
+                "code": 18
+            }
+        }
+    }
 }

@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId;
+const config = require("config");
+const USER_TYPES = Object.values(config.get("USER_TYPES"));
 
 const ProductSchema = new Schema({
   sku: {
@@ -21,10 +23,15 @@ const ProductSchema = new Schema({
     trim: true,
     required: true,
   },
+  category: {
+    type: ObjectId,
+    ref: 'Category',
+    required: true
+  },
   manufacturer: {
-    type: String,
-    required: true,
-    trim: true
+    type: ObjectId,
+    ref: 'User',
+    required: true
   },
   marketedBy: {
     type: String,
@@ -36,23 +43,31 @@ const ProductSchema = new Schema({
     ref: 'Document',
     required: true
   }],
-  size: {
-    type: Number, // e.g., 1 for 1kg, 500 for 500ml
-    required: true
-  },
-  unitOfMeasure: {
-    type: String,
-    enum: ['kg', 'g', 'liter', 'ml'],
-    required: true
-  },
+  packagingOptions: [{
+    size: {
+      type: Number,
+      required: true
+    }, 
+    unitOfMeasure: {
+      type: String,
+      enum: ['kg', 'g', 'liter', 'ml'],
+      required: true
+    },
+    caseSize: {
+      type: Number,
+      required: false
+    }
+  }],
   recommendedDose: {
     type: String,
     trim: true,
+    required: false
   },
   registrationNumber: {
     type: String,
     trim: true,
-    required: true
+    required: true,
+    unique: true
   },
   description: {
     type: String,
@@ -61,41 +76,39 @@ const ProductSchema = new Schema({
   },
   pamphlet: {
     type: ObjectId,
-    ref: 'Document'
+    ref: 'Document',
+    required: false
+  },
+  safetyInstructions: {
+    type: String,
+    trim: true,
+    required: false
   },
   antidote: {
     type: String,
     trim: true,
   },
-  recommendedDose: {
+  storageInstructions: {
     type: String,
     trim: true,
+    required: false
   },
   hsnCode: {
     type: String,
     trim: true,
-  },
-  gstPercentage: {
-    type: Number, // e.g., 18 for 18%
-  },
-  price: {
-    purchasePrice: {
-      type: Number,
-      required: true,
-    },
-    sellingPrice: {
-      type: Number,
-      required: true,
-    },
-    discount: {
-      type: Number, // Percentage discount if applicable
-      default: 0
-    }
+    required: true
   },
   status: {
     type: String,
-    enum: ["ACTIVE", "INACTIVE", "DISCONTINUED"],
-    default: "ACTIVE",
+    enum: ["ACTIVE", "INACTIVE", "DISCONTINUED", "PENDING_APPROVAL"],
+    default: "PENDING_APPROVAL",
+  },
+  approvedBy: {
+    type: ObjectId,
+    ref: 'User'
+  },
+  approvedAt: {
+    type: Date
   },
   isDeleted: {
     type: Boolean,
@@ -109,6 +122,7 @@ const ProductSchema = new Schema({
   createdByType: {
     type: String,
     enum: USER_TYPES,
+    required: true
   },
   updatedBy: {
     type: ObjectId,
@@ -118,11 +132,10 @@ const ProductSchema = new Schema({
     type: String,
     enum: USER_TYPES
   }
-},
-{
+}, {
   timestamps: true,
   toObject: { virtuals: true },
-  toJSON: { virtuals: true },
+  toJSON: { virtuals: true }
 });
 
 // Middleware to filter out deleted products

@@ -1,79 +1,45 @@
-const config = require("config");
-const USER_TYPES = Object.values(config.get("USER_TYPES"));
+// models/User.js
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Types.ObjectId;
+const config = require("config");
+const USER_TYPES = Object.values(config.get("USER_TYPES"));
 
-const UserModel = new Schema({
+const UserSchema = new Schema({
   profilePic: {
     type: String,
     default: "/profilepics/defaultuser.jpg",
   },
   qualificationDocs: [
     {
-      name: {
-        type: String
-      },
-      doc: {
-        type: ObjectId,
-        ref: 'Document'
-      },
+      name: { type: String },
+      doc: { type: ObjectId, ref: 'Document' },
     }
   ],
   aadhaar: {
-    number: {
-      type: String
-    },
+    number: { type: String },
     doc: {
-      front: {
-        type: ObjectId,
-        ref: 'Document'
-      },
-      back: {
-        type: ObjectId,
-        ref: 'Document'
-      }
+      front: { type: ObjectId, ref: 'Document' },
+      back: { type: ObjectId, ref: 'Document' }
     },
     note: { type: String }
   },
   pan: {
-    number: {
-      type: String
-    },
+    number: { type: String },
     doc: {
-      front: {
-        type: ObjectId,
-        ref: 'Document'
-      },
-      back: {
-        type: ObjectId,
-        ref: 'Document'
-      }
+      front: { type: ObjectId, ref: 'Document' },
+      back: { type: ObjectId, ref: 'Document' }
     },
     note: { type: String }
   },
   bankDetails: {
-    accountName: {
-      type: String
-    },
-    accountNumber: {
-      type: String
-    },
-    ifscCode: {
-      type: String
-    },
-    bankName: {
-      type: String
-    },
+    accountName: { type: String },
+    accountNumber: { type: String },
+    ifscCode: { type: String },
+    bankName: { type: String },
     cancelCheque: {
-      front: {
-        type: ObjectId,
-        ref: 'Document'
-      },
-      back: {
-        type: ObjectId,
-        ref: 'Document'
-      }
+      front: { type: ObjectId, ref: 'Document' },
+      back: { type: ObjectId, ref: 'Document' }
     },
     note: { type: String }
   },
@@ -89,6 +55,7 @@ const UserModel = new Schema({
     lowercase: true,
     trim: true,
     required: true,
+    unique: true, // enforcing uniqueness on email
     index: true
   },
   gender: {
@@ -97,19 +64,11 @@ const UserModel = new Schema({
     enum: ['MALE', 'FEMALE', 'OTHER'],
     default: 'OTHER'
   },
-  dob: {
-    type: Date
-  },
+  dob: { type: Date },
   address: [{
-    addressType: {
-      type: String
-    },
-    lat: {
-      type: Number
-    },
-    long: {
-      type: Number
-    },
+    addressType: { type: String },
+    lat: { type: Number },
+    long: { type: Number },
     address: String,
     city: String,
     state: String,
@@ -118,13 +77,10 @@ const UserModel = new Schema({
     zip: String,
   }],
   phone: [{
-    phoneType: {
-      type: String
-    },
+    phoneType: { type: String },
     phone: {
       type: String,
       trim: true,
-      default: "",
       required: true,
     },
     countryCode: {
@@ -133,10 +89,7 @@ const UserModel = new Schema({
       default: "91",
     }
   }],
-  password: {
-    type: String,
-    required: true,
-  },
+  password: { type: String, required: true },
   type: [{
     type: String,
     enum: USER_TYPES,
@@ -146,49 +99,24 @@ const UserModel = new Schema({
     enum: ["ACTIVE", "INACTIVE", "BLOCKED", "PENDING", "REJECTED"],
     default: "ACTIVE",
   },
-  isDeleted: {
-    type: Boolean,
-    default: false,
-  },
-  createdBy: {
-    type: ObjectId,
-    ref: 'User'
-  },
-  createdByType: {
-    type: String,
-    enum: USER_TYPES
-  },
-  updatedBy: {
-    type: ObjectId,
-    ref: 'User'
-  },
-  updatedByType: {
-    type: String,
-    enum: USER_TYPES
-  }
-},
-  {
-    timestamps: true,
-    toObject: { virtuals: true },
-    toJSON: { virtuals: true },
-  }
-);
-
-UserModel.pre("find", function (next) {
-  this.where({ isDeleted: false });
-  next();
+  isDeleted: { type: Boolean, default: false },
+  createdBy: { type: ObjectId, ref: 'User' },
+  createdByType: { type: String, enum: USER_TYPES },
+  updatedBy: { type: ObjectId, ref: 'User' },
+  updatedByType: { type: String, enum: USER_TYPES },
+  isPhoneVerified: { type: Boolean, default: false }
+}, {
+  timestamps: true,
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true },
 });
 
-
-UserModel.pre("findOne", function (next) {
-  this.where({ isDeleted: false });
-  next();
+// Ensure all queries filter out soft-deleted records
+["find", "findOne", "findOneAndUpdate"].forEach(method => {
+  UserSchema.pre(method, function (next) {
+    this.where({ isDeleted: false });
+    next();
+  });
 });
 
-UserModel.pre("findOneAndUpdate", function (next) {
-  this.where({ isDeleted: false });
-  next();
-});
-
-const User = mongoose.model("User", UserModel);
-module.exports = User;
+module.exports = mongoose.model("User", UserSchema);

@@ -1,5 +1,5 @@
 {
-    "PORT": 9072,
+    "PORT": 9073,
     "DB_URL": "mongodb://13.232.126.175:27017/test123?retryWrites=true&loadBalanced=false&connectTimeoutMS=10000",
     "REDIS": {
         "PORT": 6379,
@@ -38,7 +38,31 @@
         "ADMIN": "ADMIN"
     },
     "OTP_TYPES": {
-        "FORGOT": "FORGOT"
+        "FORGOT": "FORGOT",
+        "EMAIL_VERIFICATION": "EMAIL_VERIFICATION"
     },
-    "maxLoginsAllowed": 2
+    "maxLoginsAllowed": 2,
+    "REGEX_PATTERNS": {
+        "GSTIN": "^\\d{2}[A-Z]{5}\\d{4}[A-Z]{1}\\d[Z]{1}[A-Z\\d]{1}$"
+    },
+    "UNIT_TYPES": [
+        "kg",
+        "g",
+        "liter",
+        "ml",
+        "piece",
+        "box"
+    ],
+    "BUSINESS_RELATIONS": {
+        "RETAILER": [
+            "CUSTOMER",
+            "RETAILER"
+        ],
+        "DISTRIBUTOR": [
+            "RETAILER"
+        ],
+        "MANUFACTURER": [
+            "DISTRIBUTOR"
+        ]
+    }
 }
