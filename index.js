@@ -102,6 +102,11 @@ app.use(async (req, res, next) => {
     next();
 });
 
+
+app.get('/', (req, res) => {
+    res.status(200).send({ status: 200, message: "Server is working fine!" });
+})
+
 /* Authorization Middleware */
 app.use(universal.Authorization);
 
