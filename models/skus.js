@@ -6,7 +6,7 @@ const skuSchema = new mongoose.Schema({
         auto: true
     },
     value: { type: String},
-    type: { type: string },
+    type: { type: String },
     code: { type: String }
 });
 
