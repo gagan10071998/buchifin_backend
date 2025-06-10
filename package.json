@@ -44,6 +44,7 @@
     "nodemon": "^2.0.16",
     "path": "^0.12.7",
     "path-to-regexp": "^6.2.1",
+    "prettier": "^3.5.3",
     "read-excel-file": "^5.6.1",
     "redis": "^3.1.2",
     "sequelize": "^6.32.1",
