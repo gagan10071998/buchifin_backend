@@ -1,14 +1,18 @@
 const express = require('express');
 const Routes = require('./routes/');
+const { skusRouter } = require('./routes/skus');
 const router = express();
-router.use('/auth', Routes.auth);
-router.use('/retailer', Routes.retailer);
-router.use('/agronomist', Routes.agronomist);
-router.use('/manufacturer', Routes.manufacturer);
-router.use('/company', Routes.company);
-router.use('/document', Routes.document);
-router.use('/category', Routes.category);
-router.use('/product', Routes.product);
-router.use('/inventory', Routes.inventory);
-router.use('/order', Routes.order);
+
+router.use('/auth', Routes.auth)
+  .use('/retailer', Routes.retailer)
+  .use('/agronomist', Routes.agronomist)
+  .use('/manufacturer', Routes.manufacturer)
+  .use('/company', Routes.company)
+  .use('/document', Routes.document)
+  .use('/category', Routes.category)
+  .use('/product', Routes.product)
+  .use('/inventory', Routes.inventory)
+  .use('/order', Routes.order)
+  .use('/skus', skusRouter)
+
 module.exports = router;
