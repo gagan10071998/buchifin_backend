@@ -6,8 +6,8 @@ const transporter = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
+        user: config.get('EMAIL_SERVICE.AUTH.USER'),
+        pass: config.get('EMAIL_SERVICE.AUTH.PASS')
     },
     tls: {
         rejectUnauthorized: false
@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 
 const sendEmail = async (to, subject, message) => {
     return await transporter.sendMail({
-        from: process.env.EMAIL_USER,
+        from: config.get('EMAIL_SERVICE.AUTH.USER'),
         to: to,
         subject: subject,
         text: message,
