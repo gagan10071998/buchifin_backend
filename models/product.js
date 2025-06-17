@@ -39,9 +39,7 @@ const ProductSchema = new Schema({
     required: true
   },
   photos: [{
-    type: ObjectId,
-    ref: 'Document',
-    required: true
+    type: { url: String, signedUrl: String },
   }],
   packagingOptions: [{
     size: {
@@ -75,9 +73,7 @@ const ProductSchema = new Schema({
     required: true
   },
   pamphlet: {
-    type: ObjectId,
-    ref: 'Document',
-    required: false
+    type: { url: String, signedUrl: String },
   },
   safetyInstructions: {
     type: String,

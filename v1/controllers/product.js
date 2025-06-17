@@ -9,6 +9,7 @@ const csvParser = require('csv-parser');
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
+const { sendResponse } = require('../../utils/sendResponse');
 
 module.exports = {
   // Create a new product
@@ -29,13 +30,13 @@ module.exports = {
       // Check if category exists
       const category = await Models.Category.findById(req.body.category);
       if (!category) {
-        return universal.response(res, MESSAGES.CATEGORY_NOT_FOUND, "Invalid category", {});
+        return sendResponse(res, 'Invalid Category', {}, 400);
       }
 
       // Check for unique SKU
       const existingSku = await Models.Product.findOne({ sku: req.body.sku });
       if (existingSku) {
-          return universal.response(res, MESSAGES.SKU_ALREADY_EXISTS, "SKU already exists", {});
+        return sendResponse(res, 'SKU already exists', {}, 400);
       }
 
       req.body.createdBy = req.user._id;

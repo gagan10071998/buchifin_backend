@@ -3,10 +3,15 @@ const controllers = require('../controllers');
 const validations = require('../validations/product');
 const universal = require('../../utils');
 const { upload } = require('../services/fileUpload');
-
+const { uploadProductsFilesToS3 } = require('../middleware/uploadProductsFilesToS3');
 // Product management routes
 router.post("/create", 
  // validations.create,
+ upload.fields([
+    { name: 'pdf', maxCount: 1 },
+    { name: 'images', maxCount: 7 }
+  ]),
+  uploadProductsFilesToS3,
   controllers.product.create
 );
 
