@@ -38,11 +38,11 @@ const uploadProductsFilesToS3 = async (req, res, next) => {
   req.body.photos.forEach((photo, index) => {
     photo.signedUrl = photosSignedUrls[index];
   });
-  req.body.pamplet = {
+  req.body.pamphlet = {
     url: req.files["pdf"] ? req.files["pdf"][0].originalname : null
   };
-  req.body.pamplet.signedUrl = req.files["pdf"]
-    ? await s3Service.getPublicUrl({ fileName: req.body.pamplet.url })
+  req.body.pamphlet.signedUrl = req.files["pdf"]
+    ? await s3Service.getPublicUrl({ fileName: req.files["pdf"][0].originalname })
     : null;
 
   next();
