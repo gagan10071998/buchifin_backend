@@ -9,30 +9,30 @@ const InventorySchema = new Schema({
   product: { type: ObjectId, ref: 'Product', required: true, index: true },
   batch: { type: String, index: true },
   packagingSize: {
-    size: { type: Number, required: true },
-    unitOfMeasure: { type: String, enum: ['kg', 'g', 'liter', 'ml'], required: true }
+    size: { type: Number },
+    unitOfMeasure: { type: String, enum: ['kg', 'g', 'liter', 'ml'] }
   },
-  quantity: { type: Number, required: true, min: 0 },
-  purchasePrice: { type: Number, required: true },
-  sellingPrice: { type: Number, required: true },
+  quantity: { type: Number, min: 0 },
+  purchasePrice: { type: Number },
+  sellingPrice: { type: Number },
   discount: { type: Number, default: 0 }, // assumed as percentage discount
-  purchaseDate: { type: Date, required: true },
-  purchasedInvoiceNumber: { type: String, required: true },
+  purchaseDate: { type: Date },
+  purchasedInvoiceNumber: { type: String },
   purchasedInvoiceDocument: { type: ObjectId, ref: 'Document' },
   status: {
     type: String,
     enum: ["IN_STOCK", "LOW_STOCK", "OUT_OF_STOCK", "EXPIRED", "RECALLED"],
     default: "IN_STOCK"
   },
-  minimumStockLevel: { type: Number, default: 0, required: true },
+  minimumStockLevel: { type: Number, default: 0 },
   // --- New Tax Fields ---
   gstPercentage: { type: Number, default: 0 },
   cgstPercentage: { type: Number, default: 0 },
   sgstPercentage: { type: Number, default: 0 },
   tcsPercentage: { type: Number, default: 0 },
   isDeleted: { type: Boolean, default: false },
-  createdBy: { type: ObjectId, ref: 'User', required: true },
-  createdByType: { type: String, enum: USER_TYPES, required: true },
+  createdBy: { type: ObjectId, ref: 'User' },
+  createdByType: { type: String, enum: USER_TYPES },
   updatedBy: { type: ObjectId, ref: 'User' },
   updatedByType: { type: String, enum: USER_TYPES },
   packagingOptionIndex: { type: Number }
