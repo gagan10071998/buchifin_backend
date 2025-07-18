@@ -11,6 +11,7 @@ const mongoose = require("mongoose");
 
 // Import the InventoryLog model
 const InventoryLog = require("../../models/inventoryLog");
+const { TRANSACTION_TYPES } = require("../../models/transaction");
 
 // Helper: reserveInventory – used to deduct stock when an order is placed
 const reserveInventory = async (productId, requiredQty, retailerId, userId) => {
@@ -46,14 +47,22 @@ const createInventoryLog = async (inventoryId, action, performedBy, changeDetail
 };
 
 // Transaction logging helper (if still needed)
-const logTransaction = async (inventoryId, productId, type, details, userId) => {
-    await new Models.Transaction({
-        inventory: inventoryId,
-        product: productId,
-        type,
-        details,
-        user: userId
-    }).save();
+const logTransaction = async (inventoryId, productId, type, details, userId, amount = 0, method = 'CASH') => {
+    try {
+        // Generate a unique transaction ID
+        const transactionId = `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        await new Models.Transaction({
+            transactionId,
+            type: TRANSACTION_TYPES.INVENTORY_ADJUSTMENT,
+            amount,
+            method,
+            createdBy: userId,
+            notes: `Inventory ${type}: ${JSON.stringify(details)}`
+        }).save();
+    } catch (error) {
+        console.log(error);
+    }
 };
 
 module.exports = {
@@ -93,7 +102,7 @@ module.exports = {
             }
 
             const inventory = await new Models.Inventory(inventoryData).save();
-            await logTransaction(inventory._id, inventory.product, "ADD", inventory.quantity, req.user._id);
+            await logTransaction(inventory._id, inventory.product, "ADD", inventory.quantity, req.user._id, inventory.purchasePrice * inventory.quantity);
 
             // Log the addition as an 'ADD' action
             await createInventoryLog(inventory._id, "ADD", req.user._id, { quantity: inventory.quantity });
@@ -417,7 +426,7 @@ module.exports = {
             });
 
             // Log the update in our transaction log...
-            await logTransaction(new ObjectId(updatedInventory._id), new ObjectId(updatedInventory.product), "UPDATE", changes, new ObjectId(req.user._id));
+            await logTransaction(new ObjectId(updatedInventory._id), new ObjectId(updatedInventory.product), "UPDATE", changes, new ObjectId(req.user._id), 0);
 
             // And log in the InventoryLog as an "UPDATE" action
             await createInventoryLog(updatedInventory._id, "UPDATE", req.user._id, changes);
