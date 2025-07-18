@@ -22,7 +22,7 @@ const generateSkuSchema = z.object({
     z.number(),
     z.object({
       size: z.number().positive("Size must be positive"),
-      unitOfMeasure: z.enum(['kg', 'g', 'liter', 'ml'], "Invalid unit of measure"),
+      unitOfMeasure: z.string(),
       caseSize: z.number().positive("Case size must be positive").optional()
     })
   ]).optional()
