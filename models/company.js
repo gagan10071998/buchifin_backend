@@ -84,7 +84,7 @@ const CompanySchema = new Schema({
     }],
     companyType: {
         type: String,
-        enum: ["Proprietorship", "Partnership", "PvtLimited"],
+        enum: ["SOLE_PROPRIETORSHIP", "PARTNERSHIP", "PRIVATE_LIMITED", "PUBLIC_LIMITED", "LLP"],
         required: true,
     },
     associateTo: { type: ObjectId, ref: 'User' },
